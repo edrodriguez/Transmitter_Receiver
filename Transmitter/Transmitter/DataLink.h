@@ -48,7 +48,7 @@ list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 //								  the bitsets separated in
 //								  groups of 64
 ////////////////////////////////////////////////////////////////
-/*list<string>*/ list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
+/*list<string>*/ list<list<bitset<12>>> SeparateInBlocks(list<bitset<12>> *binaryChacarcters);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a string containing information on the

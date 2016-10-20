@@ -46,15 +46,21 @@ int main(int argc, char* argv[])
 	{
 		list<char> infoFromFile;
 		list<bitset<8>> textInBinary;
+		list<bitset<12>> binaryDataWithHamming;
 		message message;
 
 		infoFromFile = ReadFile();
 		cout << "Information From File:" << endl;
 		PrintList(infoFromFile);
 		textInBinary = ConvertTextForTransmission(infoFromFile);
+
 		//calculate hamming
-		ApplyHammingOnMessage(message.frames);
-		message.frames = FrameMessage(textInBinary);
+		binaryDataWithHamming = ApplyHammingOnMessage(textInBinary);
+		//FRAME
+		message.frames = FrameMessage(binaryDataWithHamming);
+		//CRC
+
+		//TRANSMIT
 		TransmitMessages(message, numOfErrors);
 
 		return 0;

@@ -192,13 +192,16 @@ void GenerateTransmissionError(message &message, int numberOfBitsToChange)
 
 }
 
-void ApplyHammingOnMessage(list<frame> &frames)
+list<bitset<12>> ApplyHammingOnMessage(list<bitset<8>> data)
 {
-	for (list<frame>::iterator it = frames.begin(); it != frames.end(); it++)
+	list<bitset<12>> dataWithHamming;
+
+	for (list<bitset<8>>::iterator it = data.begin(); it != data.end(); it++)
 	{
-		for (list<bitset<8>>::iterator it2 = it->data.begin(); it2 != it->data.end(); it++)
-			it->dataWithHamming.push_back(CalculateHammingCode(*it2));
+			dataWithHamming.push_back(CalculateHammingCode(*it));
 	}
+
+	return dataWithHamming;
 }
 
 bitset<12> CalculateHammingCode(bitset<8> byteOfData)

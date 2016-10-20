@@ -29,11 +29,11 @@ using namespace std;
 list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 {
 	list<frame> frames;
-	list<list<bitset<8>>> blocks;
+	list<list<bitset<12>>> blocks;
 
 	blocks = SeparateInBlocks(&binaryChacarcters);
 
-	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
+	for (list<list<bitset<12>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
 	{
 		frame frame;
 		frame.synChar1 = IncludeSynChar();
@@ -75,17 +75,17 @@ list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 //								  the bitsets separated in				//////////////change
 //								  groups of 64
 ////////////////////////////////////////////////////////////////
-/*list<string>*/ list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
+/*list<string>*/ list<list<bitset<12>>> SeparateInBlocks(list<bitset<12>> *binaryChacarcters)
 {
-	list<list<bitset<8>>> blocks;
+	list<list<bitset<12>>> blocks;
 	//list<string> blocks;
 	//string block;
-	list<bitset<8>> block;
+	list<bitset<12>> block;
 
-	for (list<bitset<8>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
+	for (list<bitset<12>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
 	{
 		//reverse character for transmission of LSB first
-		bitset<8> reversedCharacter;
+		bitset<12> reversedCharacter;
 		for (size_t i = 0; i < it->size(); i++)
 			reversedCharacter[reversedCharacter.size() - 1 - i] = (*it)[i];
 
@@ -123,7 +123,7 @@ list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 //							7 bits indicating the number and a
 //							parity bit
 ////////////////////////////////////////////////////////////////
-/*string*/bitset<8> IncludeControlChar(/*string*/ list<bitset<8>> block)
+/*string*/bitset<8> IncludeControlChar(/*string*/ list<bitset<12>> block)
 {
 	int sizeOfBlock = CountCharsInBlock(block);
 
@@ -144,7 +144,7 @@ list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(/*string*/ list<bitset<8>> block)
+int CountCharsInBlock(/*string*/ list<bitset<12>> block)
 {
 	int numChars = block.size();
 

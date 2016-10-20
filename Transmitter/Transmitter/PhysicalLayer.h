@@ -16,8 +16,8 @@ struct frame
 	bitset<8> synChar1;
 	bitset<8> synChar2;
 	bitset<8> controlChar;
-	list<bitset<8>> data;
-	list<bitset<12>> dataWithHamming;
+	//list<bitset<8>> data;
+	list<bitset<12>> data;
 	string dataAfterCRC;
 };
 struct message
@@ -95,6 +95,6 @@ void TransmitMessages(/*list<string>*/ message message, int numOfErrors);
 ////////////////////////////////////////////////////////////////
 void GenerateTransmissionError(message &message, int numberOfBitsToChange);
 
-list<bitset<8>> ApplyHammingOnMessage(list<bitset<8>> data);
+list<bitset<12>> ApplyHammingOnMessage(list<bitset<8>> data);
 
 bitset<12> CalculateHammingCode(bitset<8> byteOfData);
