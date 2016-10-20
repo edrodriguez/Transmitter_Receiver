@@ -5,6 +5,7 @@
 
 void RunPhysicalLayerTests()
 {
+	cout << "Running Physical Layer Tests:" << endl;
 	ConvertToBinary_InputA_Returns1000001();
 	ConvertToBinary_Inputa_Returns1100001();
 	ConvertToBinary_Input0_Returns0110000();
@@ -85,6 +86,7 @@ void IsOddParity_Input1000001_ReturnFalse()
 
 void IsOddParity_Input1100001_ReturnTrue()
 {
+	//TO-DO Change string() not necessary
 	bitset<7>input(string("1100001"));
 	bool expectedOutput = true;
 	bool actualOutput;
@@ -95,4 +97,17 @@ void IsOddParity_Input1100001_ReturnTrue()
 		std::cout << "Test IsOddParity_Input1100001_ReturnFalse PASSED" << endl;
 	else
 		std::cout << "Test IsOddParity_Input1100001_ReturnFalse FAILED" << endl;
+}
+
+void GenerateTransmissionError_Input000000000001_ReturnChangeInOneBit()
+{
+	string input = "000000000001";
+	string expectedOutput = "000000000011";
+	string actualOutput;
+
+	//GenerateTransmissionError(input, 1);
+
+	actualOutput = input;
+
+	cout << input << endl;
 }

@@ -6,6 +6,7 @@
 //				to be transmitted
 ////////////////////////////////////////////////////////////////
 
+#include "PhysicalLayer.h"
 #include <string>
 #include <list>
 #include <bitset>
@@ -17,7 +18,7 @@ using namespace std;
 //				containing a string representing a message. Each
 //				one containing two syn characters (22 in decimal),
 //				a control character (number of characters in the
-//				message) and up to 64 information characters
+//				message) and up to 64 information characters			////////////////change
 //
 //	Arguments:	[in]list<bitset<8>>:list of characters expressed
 //									in a binary bitset
@@ -25,7 +26,7 @@ using namespace std;
 //	Return:		[out]list<string>:list of strings containing
 //								  all the framed messages
 ////////////////////////////////////////////////////////////////
-list<string> Frame(list<bitset<8>> binaryChacarcters);
+list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a string containing 22(decimal) in
@@ -35,7 +36,7 @@ list<string> Frame(list<bitset<8>> binaryChacarcters);
 //	Return:		[out]string: binary code for 22 with a parity
 //							 bit
 ////////////////////////////////////////////////////////////////
-string IncludeSynChar();
+/*string*/ bitset<8> IncludeSynChar();
 
 ////////////////////////////////////////////////////////////////
 //	Description:separates the bitsets in groups of 64
@@ -47,7 +48,7 @@ string IncludeSynChar();
 //								  the bitsets separated in
 //								  groups of 64
 ////////////////////////////////////////////////////////////////
-list<string> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
+/*list<string>*/ list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a string containing information on the
@@ -58,11 +59,11 @@ list<string> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
 //						   transmitted
 //
 //	Return:		[out]string:string indicating the number of 
-//							characters in the block. Composed of
+//							characters in the block. Composed of				//////////change
 //							7 bits indicating the number and a
 //							parity bit
 ////////////////////////////////////////////////////////////////
-string IncludeControlChar(string block);
+/*string*/ bitset<8> IncludeControlChar(/*string*/ list<bitset<8>> block);
 
 ////////////////////////////////////////////////////////////////
 //	Description:counts how many 8bit characters are in a block
@@ -73,4 +74,4 @@ string IncludeControlChar(string block);
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(string block);
+int CountCharsInBlock(/*string*/  list<bitset<8>> block);

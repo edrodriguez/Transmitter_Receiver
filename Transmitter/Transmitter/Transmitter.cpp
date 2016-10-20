@@ -13,24 +13,32 @@
 #include "DataLink.h"
 #include "PhysicalLayer.h"
 #include "PhysicalLayer_Test.h"
+#include "DataLink_Test.h"
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-	//Check if the application will be run in test mode
+	int numOfErrors = 0;
+
+	//Parse the input parameters
 	if (argv[1] != nullptr)
 	{
-		string testMode = argv[1];
+		string mode = argv[1];
 		
-		for (size_t i = 0; i < testMode.size(); i++)
-			testMode[i] = tolower(testMode[i]);
+		for (size_t i = 0; i < mode.size(); i++)
+			mode[i] = tolower(mode[i]);
 
-		if (testMode == "test")
+		if (mode == "-test")
 		{
 			cout << "Running Tests for Transmitter" << endl;
 			RunPhysicalLayerTests();
+			RunDataLinkTests();
 			return 0;
+		}
+		else if (mode == "-errornum")
+		{
+			numOfErrors = atoi(argv[2]);
 		}
 	}
 	// normal transmitter function
@@ -38,14 +46,16 @@ int main(int argc, char* argv[])
 	{
 		list<char> infoFromFile;
 		list<bitset<8>> textInBinary;
-		list<string> messages;
+		message message;
 
 		infoFromFile = ReadFile();
 		cout << "Information From File:" << endl;
 		PrintList(infoFromFile);
 		textInBinary = ConvertTextForTransmission(infoFromFile);
-		messages = Frame(textInBinary);
-		TransmitMessages(messages);
+		//calculate hamming
+		ApplyHammingOnMessage(message.frames);
+		message.frames = FrameMessage(textInBinary);
+		TransmitMessages(message, numOfErrors);
 
 		return 0;
 	}

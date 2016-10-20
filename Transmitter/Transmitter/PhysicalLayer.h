@@ -11,6 +11,21 @@
 
 using namespace std;
 
+struct frame
+{
+	bitset<8> synChar1;
+	bitset<8> synChar2;
+	bitset<8> controlChar;
+	list<bitset<8>> data;
+	list<bitset<12>> dataWithHamming;
+	string dataAfterCRC;
+};
+struct message
+{
+	list<frame> frames;
+	//string message;
+};
+
 ////////////////////////////////////////////////////////////////
 //	Description: converts a list of characters into a list of
 //				 bitsets containing a 7 bit binary representation
@@ -62,10 +77,12 @@ bool IsOddParity(bitset<7> binaryChar);
 //	Description:Starts the client connection and transmits all the
 //				messages composed of binary characters
 //
-//	Arguments:	[in]list<string>: list containing all the messages
+//	Arguments:	[in]list<string>: list containing all the messages		////////////change
+//				[in]int:number of errors to be introduced during
+//					transmission
 //
 ////////////////////////////////////////////////////////////////
-void TransmitMessages(list<string> messages);
+void TransmitMessages(/*list<string>*/ message message, int numOfErrors);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Changes the number of bits indicated
@@ -73,7 +90,11 @@ void TransmitMessages(list<string> messages);
 //				the message
 //
 //	Arguments:	[in]int (optional): Number of bits to change.
-//									Default value: 2.
+//									Default value: 0.
 //
 ////////////////////////////////////////////////////////////////
-void GenerateTransmissionError (int numberOfBitsToChange = 2);
+void GenerateTransmissionError(message &message, int numberOfBitsToChange);
+
+list<bitset<8>> ApplyHammingOnMessage(list<bitset<8>> data);
+
+bitset<12> CalculateHammingCode(bitset<8> byteOfData);

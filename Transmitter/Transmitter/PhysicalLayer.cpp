@@ -102,7 +102,7 @@ bool IsOddParity(bitset<7> binaryChar)
 //	Arguments:	[in]list<string>: list containing all the messages
 //
 ////////////////////////////////////////////////////////////////
-void TransmitMessages(list<string> messages)
+void TransmitMessages(message message, int numOfErrors)
 {
     //Startup
 	WSAData wsaData;
@@ -131,20 +131,27 @@ void TransmitMessages(list<string> messages)
 	//Client connected. Transmit messages
 	cout << "Connected!" << endl;
 
-	char message[537];
+	char transmittedMessage[537];
 	char accepted[1];
 	char finalMessage[537] = "Done";
 
-	for (list<string>::iterator it = messages.begin(); it != messages.end(); it++)
+	GenerateTransmissionError(message, numOfErrors);
+
+	for (list<frame>::iterator it = message.frames.begin(); it != message.frames.end(); it++)
 	{
-		string mes = *it;
-		mes.copy(message, mes.length(), 0);
-		message[mes.length()] = NULL;
+		//generate errors
+
+		//GenerateTransmissionError(it->messageWithCRC, numOfErrors);
+
+
+		//string mes = *it;
+		//mes.copy(transmittedMessage, mes.length(), 0);
+		//message[mes.length()] = NULL;
 
 		do
 		{
-			cout << "Sending Message: " << *it << endl;
-			send(Connection, message, sizeof(message), NULL); //send message
+			//cout << "Sending Message: " << *it << endl;
+			send(Connection, transmittedMessage, sizeof(message), NULL); //send message
 			recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
 			if (accepted[0] == 1)
 				cout << "--------------------Accepted Message-------------------" << endl;
@@ -155,7 +162,48 @@ void TransmitMessages(list<string> messages)
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }
 
-void GenerateTransmissionError(int numberOfBitsToChange = 2)
+////////////////////////////////////////////////////////////////
+//	Description:Changes the number of bits indicated
+//				in the input parameter in a random position in
+//				the message
+//
+//	Arguments:	[in]int (optional): Number of bits to change.
+//									Default value: 0.
+//
+////////////////////////////////////////////////////////////////
+void GenerateTransmissionError(message &message, int numberOfBitsToChange)
 {
+	if (numberOfBitsToChange == 0)
+		return;
 
+	//for (int i = 0; i < numberOfBitsToChange; i++)
+	//{
+	//	int FrameToModify = rand() % message.frames.size();
+
+	//	list<frame>::iterator it = next(message.frames.begin(), FrameToModify);
+
+	//	int FrameToModify = rand() % it->;
+
+	//	if (message.frames[bitToModify])
+	//		message[bitToModify] = '0';
+	//	else
+	//		message[bitToModify] = '1';
+	//}
+
+}
+
+void ApplyHammingOnMessage(list<frame> &frames)
+{
+	for (list<frame>::iterator it = frames.begin(); it != frames.end(); it++)
+	{
+		for (list<bitset<8>>::iterator it2 = it->data.begin(); it2 != it->data.end(); it++)
+			it->dataWithHamming.push_back(CalculateHammingCode(*it2));
+	}
+}
+
+bitset<12> CalculateHammingCode(bitset<8> byteOfData)
+{
+	bitset<12> byteWithHamming;
+
+	return byteWithHamming;
 }

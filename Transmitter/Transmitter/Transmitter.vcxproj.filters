@@ -30,6 +30,9 @@
     <ClCompile Include="PhysicalLayer_Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DataLink_Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PhysicalLayer.h">
@@ -44,7 +47,7 @@
     <ClInclude Include="PhysicalLayer_Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestFramework.h">
+    <ClInclude Include="DataLink_Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

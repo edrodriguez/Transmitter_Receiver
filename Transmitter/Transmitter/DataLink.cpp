@@ -18,7 +18,7 @@ using namespace std;
 //				containing a string representing a message. Each
 //				one containing two syn characters (22 in decimal),
 //				a control character (number of characters in the
-//				message) and up to 64 information characters
+//				message) and up to 64 information characters			////////////////to be changed
 //
 //	Arguments:	[in]list<bitset<8>>:list of characters expressed
 //									in a binary bitset
@@ -26,31 +26,35 @@ using namespace std;
 //	Return:		[out]list<string>:list of strings containing
 //								  all the framed messages
 ////////////////////////////////////////////////////////////////
-list<string> Frame(list<bitset<8>> binaryChacarcters)
+list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 {
-	list<string> blocks;
-	list<string> messages;
-	string frammedMessage;
+	list<frame> frames;
+	list<list<bitset<8>>> blocks;
 
 	blocks = SeparateInBlocks(&binaryChacarcters);
 
-	for (list<string>::iterator it = blocks.begin(); it != blocks.end(); it++)
+	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
 	{
-		messages.push_back(IncludeSynChar() + IncludeSynChar() + IncludeControlChar(*it) + *it);
+		frame frame;
+		frame.synChar1 = IncludeSynChar();
+		frame.synChar2 = IncludeSynChar();
+		frame.controlChar = IncludeControlChar(*it);
+		frame.data = *it;
+		frames.push_back(frame);
 	}
 
-	return messages;
+	return frames;
 }
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a string containing 22(decimal) in
 //				binary as well as a parity bit appended at the
-//				end of the string
+//				end of the string													/////////change
 //
 //	Return:		[out]string: binary code for 22 with a parity
 //							 bit
 ////////////////////////////////////////////////////////////////
-string IncludeSynChar()
+/*string*/ bitset<8> IncludeSynChar()
 {
 	const string ACII_22 = "0010110";
 	bitset<7> synChar(ACII_22);
@@ -58,7 +62,7 @@ string IncludeSynChar()
 	//maybe not necessary
 	bitset<8> synCharWithParity = IncludeParityBit(synChar);
 
-	return synCharWithParity.to_string();
+	return synCharWithParity/*.to_string()*/;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -68,13 +72,15 @@ string IncludeSynChar()
 //									in a binary bitset
 //
 //	Return:		[out]list<string>:list of strings containing
-//								  the bitsets separated in
+//								  the bitsets separated in				//////////////change
 //								  groups of 64
 ////////////////////////////////////////////////////////////////
-list<string> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
+/*list<string>*/ list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
 {
-	list<string> blocks;
-	string block;
+	list<list<bitset<8>>> blocks;
+	//list<string> blocks;
+	//string block;
+	list<bitset<8>> block;
 
 	for (list<bitset<8>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
 	{
@@ -86,14 +92,14 @@ list<string> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
 		//If it's not the 64th character, append it to the same block
 		if ((distance(binaryChacarcters->begin(), it) + 1) % 64 != 0)
 		{
-			block += reversedCharacter.to_string();
+			block.push_back(reversedCharacter);
 		}
 		//If it's the 64th character, add it to the block and then separate that block
 		else
 		{
-			block += reversedCharacter.to_string();
+			block.push_back(reversedCharacter);
 			blocks.push_back(block);
-			block = "";
+			block.clear();
 		}
 	}
 
@@ -112,12 +118,12 @@ list<string> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
 //	Arguments:	[in]string:block containing all the bits to be
 //						   transmitted
 //
-//	Return:		[out]string:string indicating the number of 
+//	Return:		[out]string:string indicating the number of				///////////change
 //							characters in the block. Composed of
 //							7 bits indicating the number and a
 //							parity bit
 ////////////////////////////////////////////////////////////////
-string IncludeControlChar(string block)
+/*string*/bitset<8> IncludeControlChar(/*string*/ list<bitset<8>> block)
 {
 	int sizeOfBlock = CountCharsInBlock(block);
 
@@ -126,21 +132,21 @@ string IncludeControlChar(string block)
 	//maybe not necessary
 	bitset<8> controlCharWithParity = IncludeParityBit(controlChar);
 
-	return controlCharWithParity.to_string();
+	return controlCharWithParity/*.to_string()*/;
 }
 
 ////////////////////////////////////////////////////////////////
 //	Description:counts how many 8bit characters are in a block
 //
 //	Arguments:	[in]string:block containing all the bits to be
-//						   transmitted
+//						   transmitted								///////change
 //
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(string block)
+int CountCharsInBlock(/*string*/ list<bitset<8>> block)
 {
-	int numChars = block.size() / 8;
+	int numChars = block.size();
 
 	return numChars;
 }

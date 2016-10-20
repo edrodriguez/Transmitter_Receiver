@@ -13,3 +13,5 @@ void ConvertToBinary_Input$_Returns0100100();
 void IsOddParity_Input1000001_ReturnFalse();
 
 void IsOddParity_Input1100001_ReturnTrue();
+
+void GenerateTransmissionError_Input000000000001_ReturnChangeInOneBit();
