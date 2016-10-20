@@ -14,8 +14,8 @@ void RunDataLinkTests()
 
 void CountCharsInBlock_Input1ElementList_Return1()
 {
-	list<bitset<8>> input;
-	bitset<8> testBitset("10101010");
+	list<bitset<12>> input;
+	bitset<12> testBitset("101010101010");
 	int expectedOutput = 1;
 	int actualOutput;
 
@@ -33,8 +33,8 @@ void CountCharsInBlock_Input1ElementList_Return1()
 
 void CountCharsInBlock_Input64ElementList_Return64()
 {
-	list<bitset<8>> input;
-	bitset<8> testBitset("10101010");
+	list<bitset<12>> input;
+	bitset<12> testBitset("101010101010");
 	int expectedOutput = 64;
 	int actualOutput;
 
@@ -53,8 +53,8 @@ void CountCharsInBlock_Input64ElementList_Return64()
 
 void IncludeControlChar_Input1ElementList_Return00000011()
 {
-	list<bitset<8>> input;
-	bitset<8> testBitset("10101010");
+	list<bitset<12>> input;
+	bitset<12> testBitset("101010101010");
 	bitset<8> expectedOutput("00000011");
 	bitset<8> actualOutput;
 
@@ -71,8 +71,8 @@ void IncludeControlChar_Input1ElementList_Return00000011()
 
 void IncludeControlChar_Input64ElementList_Return10000001()
 {
-	list<bitset<8>> input;
-	bitset<8> testBitset("10101010");
+	list<bitset<12>> input;
+	bitset<12> testBitset("101010101010");
 	bitset<8> expectedOutput("10000001");
 	bitset<8> actualOutput;
 

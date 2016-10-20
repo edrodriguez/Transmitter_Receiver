@@ -6,8 +6,8 @@
 //				message to binary and transmitting it
 ////////////////////////////////////////////////////////////////
 #include <string>
-#include <bitset>
 #include <list>
+#include <bitset>
 
 using namespace std;
 
@@ -18,12 +18,18 @@ struct frame
 	bitset<8> controlChar;
 	//list<bitset<8>> data;
 	list<bitset<12>> data;
-	string dataAfterCRC;
+	string CRCCode;
 };
 struct message
 {
 	list<frame> frames;
-	//string message;
+};
+
+struct transmissionError
+{
+	int frameLocation;
+	int byteLocation;
+	int bitLocation;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -89,12 +95,16 @@ void TransmitMessages(/*list<string>*/ message message, int numOfErrors);
 //				in the input parameter in a random position in
 //				the message
 //
-//	Arguments:	[in]int (optional): Number of bits to change.
+//	Arguments:	[in]int (optional): Number of bits to change.		/////////////change
 //									Default value: 0.
 //
 ////////////////////////////////////////////////////////////////
-void GenerateTransmissionError(message &message, int numberOfBitsToChange);
+list<transmissionError> GenerateTransmissionError(message &message, int numberOfBitsToChange);
 
-list<bitset<12>> ApplyHammingOnMessage(list<bitset<8>> data);
+list<bitset<12>> GenerateHamming(list<bitset<8>> data);
 
 bitset<12> CalculateHammingCode(bitset<8> byteOfData);
+
+void GenerateCRC(list<frame> &frames);
+
+void CalculateCRC(frame &frame);

@@ -26,12 +26,12 @@ using namespace std;
 //	Return:		[out]list<string>:list of strings containing
 //								  all the framed messages
 ////////////////////////////////////////////////////////////////
-list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
+list<frame> FrameMessage(list<bitset<12>> data)
 {
 	list<frame> frames;
 	list<list<bitset<12>>> blocks;
 
-	blocks = SeparateInBlocks(&binaryChacarcters);
+	blocks = SeparateInBlocks(&data);
 
 	for (list<list<bitset<12>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
 	{
@@ -84,21 +84,22 @@ list<frame> FrameMessage(list<bitset<12>> binaryChacarcters)
 
 	for (list<bitset<12>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
 	{
-		//reverse character for transmission of LSB first
-		bitset<12> reversedCharacter;
-		for (size_t i = 0; i < it->size(); i++)
-			reversedCharacter[reversedCharacter.size() - 1 - i] = (*it)[i];
+		////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REVERSE CHARACTERS LATER, JUST BEFORE TRANSMITTING!!!!!!!!!!!!!!!111
+		////reverse character for transmission of LSB first
+		//bitset<12> reversedCharacter;
+		//for (size_t i = 0; i < it->size(); i++)
+		//	reversedCharacter[reversedCharacter.size() - 1 - i] = (*it)[i];
 
 		//If it's not the 64th character, append it to the same block
 		if ((distance(binaryChacarcters->begin(), it) + 1) % 64 != 0)
-		{
-			block.push_back(reversedCharacter);
+		{	
+			block.push_back(*it); //used to be reversed character
 		}
 		//If it's the 64th character, add it to the block and then separate that block
 		else
 		{
-			block.push_back(reversedCharacter);
-			blocks.push_back(block);
+			block.push_back(*it); //used to be reversed character
+			blocks.push_back(block); 
 			block.clear();
 		}
 	}

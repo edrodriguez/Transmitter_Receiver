@@ -5,6 +5,7 @@
 //				information to be transmitted from a .txt file
 ////////////////////////////////////////////////////////////////
 
+#include "PhysicalLayer.h"
 #include <fstream>
 #include <string>
 #include <iostream> //maybe not necessary if no in out to console
@@ -73,4 +74,48 @@ void PrintList(list<bitset<8>> l)
 {
 	for (list<bitset<8>>::iterator it = l.begin(); it != l.end(); it++)
 		cout << *it << ' ';
+	cout << endl;
+}
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<bitset<12>> l)
+{
+	for (list<bitset<12>>::iterator it = l.begin(); it != l.end(); it++)
+		cout << *it << ' ';
+	cout << endl;
+}
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<frame> l)
+{
+	for (list<frame>::iterator it = l.begin(); it != l.end(); it++)
+	{
+		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
+
+		PrintList(it->data);
+		//for (list<bitset<12>>::iterator it2 = (it->data).begin(); it2 != (it->data).end(); it2++)
+			//cout << *it2;
+
+		cout << it->CRCCode;
+	}
+
+	cout << endl;
+}
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<transmissionError> l)
+{
+	cout << "---------------" << l.size() << " Errors Introduced---------------" << endl;
+
+	for (list<transmissionError>::iterator it = l.begin(); it != l.end(); it++)
+	{
+		cout << "*Error:" << endl;
+		cout << "\t-Frame: " << it->frameLocation << endl;;
+		cout << "\t-Byte: " << it->byteLocation << endl;;
+		cout << "\t-Bit: " << it->bitLocation << endl;;
+	}
+	cout << endl;
 }

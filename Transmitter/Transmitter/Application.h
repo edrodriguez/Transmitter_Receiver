@@ -5,6 +5,7 @@
 //				This layer is in charge of reading the
 //				information to be transmitted from a .txt file
 ////////////////////////////////////////////////////////////////
+#include "PhysicalLayer.h"
 #include <list>
 
 using namespace std;
@@ -35,3 +36,15 @@ void PrintList(list<bitset<7>> l);
 ////Auxiliary method for printing list
 ////////////////////
 void PrintList(list<bitset<8>> l);
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<bitset<12>> l);
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<frame> l);
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<transmissionError> l);

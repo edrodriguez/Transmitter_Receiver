@@ -63,7 +63,7 @@ list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 //							7 bits indicating the number and a
 //							parity bit
 ////////////////////////////////////////////////////////////////
-/*string*/ bitset<8> IncludeControlChar(/*string*/ list<bitset<8>> block);
+/*string*/ bitset<8> IncludeControlChar(/*string*/ list<bitset<12>> block);
 
 ////////////////////////////////////////////////////////////////
 //	Description:counts how many 8bit characters are in a block
@@ -74,4 +74,4 @@ list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(/*string*/  list<bitset<8>> block);
+int CountCharsInBlock(/*string*/  list<bitset<12>> block);

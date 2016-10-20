@@ -6,12 +6,13 @@
 ////////////////////////////////////////////////////////////////
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib")
+#include "PhysicalLayer.h"
 #include <iostream>
 #include <WinSock2.h>
-#include "PhysicalLayer.h"
 #include <string>
 #include <bitset>
 #include <list>
+#include <random> 
 
 using namespace std;
 
@@ -171,28 +172,41 @@ void TransmitMessages(message message, int numOfErrors)
 //									Default value: 0.
 //
 ////////////////////////////////////////////////////////////////
-void GenerateTransmissionError(message &message, int numberOfBitsToChange)
+list<transmissionError> GenerateTransmissionError(message &message, int numberOfBitsToChange)
 {
-	if (numberOfBitsToChange == 0)
-		return;
+	list<transmissionError> errors;
 
-	//for (int i = 0; i < numberOfBitsToChange; i++)
-	//{
-	//	int FrameToModify = rand() % message.frames.size();
+	for (int i = 0; i < numberOfBitsToChange; i++)
+	{
+		int frameLocation, byteLocation, bitLocation;
+		transmissionError error;
+		random_device rd;
 
-	//	list<frame>::iterator it = next(message.frames.begin(), FrameToModify);
+		//Randomly generate a frame numbe
+		frameLocation = abs(int(rd())) % message.frames.size();
+		list<frame>::iterator frameIt = next(message.frames.begin(), frameLocation);
 
-	//	int FrameToModify = rand() % it->;
+		//Randomly generate a byte number (((((((((((((((((((((((((((Not really a bite but a character)))))))))))))9
+		byteLocation = abs(int(rd())) % (frameIt->data).size(); ////////Error just generated in the data, not in the frame part of the message
+		list<bitset<12>>::iterator byteIt = next(frameIt->data.begin(), byteLocation);
 
-	//	if (message.frames[bitToModify])
-	//		message[bitToModify] = '0';
-	//	else
-	//		message[bitToModify] = '1';
-	//}
+		//Randomly generate a bit number
+		bitLocation = abs(int(rd())) % 12;		///////////assuming error just in data
 
+		//Modify the selected bit
+		byteIt->flip(bitLocation);
+
+		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
+		error.byteLocation = byteLocation + 1;
+		error.bitLocation = bitLocation + 1;
+
+		errors.push_back(error);
+	}
+
+	return errors;
 }
 
-list<bitset<12>> ApplyHammingOnMessage(list<bitset<8>> data)
+list<bitset<12>> GenerateHamming(list<bitset<8>> data)
 {
 	list<bitset<12>> dataWithHamming;
 
@@ -209,4 +223,17 @@ bitset<12> CalculateHammingCode(bitset<8> byteOfData)
 	bitset<12> byteWithHamming;
 
 	return byteWithHamming;
+}
+
+void GenerateCRC(list<frame> &frames)
+{
+	for (list<frame>::iterator it = frames.begin(); it != frames.end(); it++)
+	{
+		CalculateCRC(*it);
+	}
+}
+
+void CalculateCRC(frame &frame)
+{
+
 }
