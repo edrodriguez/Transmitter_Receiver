@@ -133,10 +133,8 @@ void TransmitMessages(message message, int numOfErrors)
 	cout << "Connected!" << endl;
 
 	char transmittedMessage[537];
-	char accepted[1];
+	char accepted[1] = { '0' };
 	char finalMessage[537] = "Done";
-
-	GenerateTransmissionError(message, numOfErrors);
 
 	for (list<frame>::iterator it = message.frames.begin(); it != message.frames.end(); it++)
 	{
@@ -149,15 +147,25 @@ void TransmitMessages(message message, int numOfErrors)
 		//mes.copy(transmittedMessage, mes.length(), 0);
 		//message[mes.length()] = NULL;
 
+
+		//cout << "Sending Message: " << *it << endl;
+		if (numOfErrors != 0)
+			;//send message with errors
+		else
+			;//send correct message
+		//send(Connection, transmittedMessage, sizeof(message), NULL); //send message
+		
 		do
 		{
-			//cout << "Sending Message: " << *it << endl;
-			send(Connection, transmittedMessage, sizeof(message), NULL); //send message
 			recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+
 			if (accepted[0] == 1)
 				cout << "--------------------Accepted Message-------------------" << endl;
 			else
-				cout << "--------------------Rejected Message-------------------" << endl;
+			{
+				cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
+				//send correct message
+			}
 		} while (accepted[0] == 0);
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
@@ -176,24 +184,29 @@ list<transmissionError> GenerateTransmissionError(message &message, int numberOf
 {
 	list<transmissionError> errors;
 
+	//Copy the data into data with error
+	CopyDataForErrorGeneration(message);
+
 	for (int i = 0; i < numberOfBitsToChange; i++)
 	{
 		int frameLocation, byteLocation, bitLocation;
 		transmissionError error;
 		random_device rd;
 
-		//Randomly generate a frame numbe
+		//Randomly generate a frame number
 		frameLocation = abs(int(rd())) % message.frames.size();
 		list<frame>::iterator frameIt = next(message.frames.begin(), frameLocation);
 
+		//Copy the data of the frame
+
 		//Randomly generate a byte number (((((((((((((((((((((((((((Not really a bite but a character)))))))))))))9
 		byteLocation = abs(int(rd())) % (frameIt->data).size(); ////////Error just generated in the data, not in the frame part of the message
-		list<bitset<12>>::iterator byteIt = next(frameIt->data.begin(), byteLocation);
+		list<bitset<12>>::iterator byteIt = next(frameIt->errorData.begin(), byteLocation);
 
 		//Randomly generate a bit number
 		bitLocation = abs(int(rd())) % 12;		///////////assuming error just in data
 
-		//Modify the selected bit
+		//Modi
 		byteIt->flip(bitLocation);
 
 		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
@@ -204,6 +217,12 @@ list<transmissionError> GenerateTransmissionError(message &message, int numberOf
 	}
 
 	return errors;
+}
+
+void CopyDataForErrorGeneration(message &message)
+{
+	for (list<frame>::iterator it = message.frames.begin(); it != message.frames.end(); it++)
+		it->errorData = it->data;
 }
 
 list<bitset<12>> GenerateHamming(list<bitset<8>> data)

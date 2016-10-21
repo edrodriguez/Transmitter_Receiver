@@ -18,6 +18,7 @@ struct frame
 	bitset<8> controlChar;
 	//list<bitset<8>> data;
 	list<bitset<12>> data;
+	list<bitset<12>> errorData;
 	string CRCCode;
 };
 struct message
@@ -100,6 +101,8 @@ void TransmitMessages(/*list<string>*/ message message, int numOfErrors);
 //
 ////////////////////////////////////////////////////////////////
 list<transmissionError> GenerateTransmissionError(message &message, int numberOfBitsToChange);
+
+void CopyDataForErrorGeneration(message &message);
 
 list<bitset<12>> GenerateHamming(list<bitset<8>> data);
 

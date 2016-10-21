@@ -66,9 +66,12 @@ int main(int argc, char* argv[])
 	PrintList(message.frames);
 	//Generate Transmission errors
 	if (numOfErrors > 0)
+	{
 		errorsIntroduced = GenerateTransmissionError(message, numOfErrors);
-	PrintList(errorsIntroduced);
-	PrintList(message.frames);
+		PrintList(errorsIntroduced);
+	}
+	else
+		PrintList(message.frames);
 	//Transmit
 	//TransmitMessages(message, numOfErrors);
 

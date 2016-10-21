@@ -88,15 +88,17 @@ void PrintList(list<bitset<12>> l)
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<frame> l)
+void PrintList(list<frame> l, int numOfErrors)
 {
+
 	for (list<frame>::iterator it = l.begin(); it != l.end(); it++)
 	{
 		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
 
-		PrintList(it->data);
-		//for (list<bitset<12>>::iterator it2 = (it->data).begin(); it2 != (it->data).end(); it2++)
-			//cout << *it2;
+		if (numOfErrors == 0)
+			PrintList(it->data);
+		else
+			PrintList(it->errorData);
 
 		cout << it->CRCCode;
 	}

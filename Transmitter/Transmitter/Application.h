@@ -43,7 +43,7 @@ void PrintList(list<bitset<12>> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<frame> l);
+void PrintList(list<frame> l, int numOfErrors = 0);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
