@@ -7,6 +7,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib")
 #include "PhysicalLayer.h"
+#include "Application.h"
 #include <iostream>
 #include <WinSock2.h>
 #include <string>
@@ -89,38 +90,35 @@ void ConnectSocket(SOCKET &Connection)
 //	Arguments:	[in]list<string>: list containing all the messages
 //
 ////////////////////////////////////////////////////////////////
-void TransmitFrames(list<HammingFrame>, int numOfErrors)				/////////hamming overload
+void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamming overload
 {
 	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
 	list<transmissionError> errorsIntroduced;
+	list<HammingFrame> framesWithErrors;
 
-
-	///////////////////Find right place///////////////////////////////
 	//Generate Transmission errors
 	if (numOfErrors > 0)
 	{
-		errorsIntroduced = GenerateTransmissionError(message, numOfErrors);
+		errorsIntroduced = GenerateTransmissionError(frames, framesWithErrors, numOfErrors);
 		PrintList(errorsIntroduced);
 	}
-	//////////////////////////////////////////////////////////////////
 
-	char transmittedMessage[537];
+	char transmittedMessage[805];
 	char accepted[1] = { '0' };
 	char finalMessage[537] = "Done";
 
-	for (list<frame>::iterator it = message.frames.begin(); it != message.frames.end(); it++)
+	for (list<HammingFrame>::iterator it = frames.begin(); it != frames.end(); it++)
 	{
-		//generate errors
-
-		//GenerateTransmissionError(it->messageWithCRC, numOfErrors);
-
+		///Convert frame into string
+		///mes.copy(transmittedMessage, mes.length(), 0);
+		///message[mes.length()] = NULL;
 
 		//string mes = *it;
 		//mes.copy(transmittedMessage, mes.length(), 0);
 		//message[mes.length()] = NULL;
 
 
-		//cout << "Sending Message: " << *it << endl;
+		cout << "Sending Frames: " << endl;
 		if (numOfErrors != 0)
 			;//send message with errors
 		else

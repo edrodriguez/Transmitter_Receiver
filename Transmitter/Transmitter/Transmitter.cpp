@@ -67,7 +67,10 @@ int main(int argc, char* argv[])
 				FrameMessage(binaryData, CRCFrames);
 
 				cout << "---------------------Frames With CRC---------------------" << endl;
-				PrintList(message.CRCFrames);
+				PrintList(CRCFrames);
+
+				//Reverse characters
+				//TransmitMessages(message, mode, numOfErrors);
 			}
 			else if (mode == "-hamming")
 			{
@@ -76,11 +79,11 @@ int main(int argc, char* argv[])
 				FrameMessage(binaryData, HammingFrames);
 
 				cout << "-------------------Frames With Hamming-------------------" << endl;
-				PrintList(message.HammingFrames);
-			}
+				PrintList(HammingFrames);
 
-			//Reverse characters
-			TransmitMessages(message, mode, numOfErrors);
+				//Reverse characters
+				//TransmitMessages(message, mode, numOfErrors);
+			}
 		}
 	}
 	else
