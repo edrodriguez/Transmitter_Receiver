@@ -26,43 +26,66 @@ using namespace std;
 //	Return:		[out]list<string>:list of strings containing
 //								  all the framed messages
 ////////////////////////////////////////////////////////////////
-list<frame> FrameMessage(list<bitset<12>> data)
+void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frames)  //overload for hamming
 {
-	list<frame> frames;
-	list<list<bitset<12>>> blocks;
+	list<list<bitset<8>>> blocks;
 
 	blocks = SeparateInBlocks(&data);
 
-	for (list<list<bitset<12>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
+	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
 	{
-		frame frame;
+		HammingFrame frame;
+		frame.synChar1 = CalculateHammingCode(IncludeSynChar());
+		frame.synChar2 = CalculateHammingCode(IncludeSynChar());
+		frame.controlChar = CalculateHammingCode(IncludeControlChar(*it));
+		frame.data = GenerateHammingForData(*it);
+		frames.push_back(frame);
+	}
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:generates a list of string with each entry
+//				containing a string representing a message. Each
+//				one containing two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message) and up to 64 information characters			////////////////change
+//
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in a binary bitset
+//
+//	Return:		[out]list<string>:list of strings containing
+//								  all the framed messages
+////////////////////////////////////////////////////////////////
+void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frames) //crc overload
+{
+	list<list<bitset<8>>> blocks;
+
+	blocks = SeparateInBlocks(&data);
+
+	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
+	{
+		CRCFrame frame;
 		frame.synChar1 = IncludeSynChar();
 		frame.synChar2 = IncludeSynChar();
 		frame.controlChar = IncludeControlChar(*it);
 		frame.data = *it;
+		CalculateCRC(frame);
 		frames.push_back(frame);
 	}
-
-	return frames;
 }
 
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing 22(decimal) in
-//				binary as well as a parity bit appended at the
-//				end of the string													/////////change
+//	Description:Returns a string containing the ASCII Syn char
+//				22(decimal) in binary							
 //
-//	Return:		[out]string: binary code for 22 with a parity
-//							 bit
+//	Return:		[out]bitset<8>: 8 bit binary code for 22
 ////////////////////////////////////////////////////////////////
-/*string*/ bitset<8> IncludeSynChar()
+bitset<8> IncludeSynChar()
 {
 	const string ACII_22 = "0010110";
-	bitset<7> synChar(ACII_22);
-	
-	//maybe not necessary
-	bitset<8> synCharWithParity = IncludeParityBit(synChar);
+	bitset<8> synChar(ACII_22);
 
-	return synCharWithParity/*.to_string()*/;
+	return synChar;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -71,18 +94,16 @@ list<frame> FrameMessage(list<bitset<12>> data)
 //	Arguments:	[in]list<bitset<8>>:list of characters expressed
 //									in a binary bitset
 //
-//	Return:		[out]list<string>:list of strings containing
-//								  the bitsets separated in				//////////////change
-//								  groups of 64
+//	Return:		[out]list<list<bitset<8>>: A list of 
+//						lists of bitsets containing the bitsets
+//						separated in groups of 64
 ////////////////////////////////////////////////////////////////
-/*list<string>*/ list<list<bitset<12>>> SeparateInBlocks(list<bitset<12>> *binaryChacarcters)
+list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
 {
-	list<list<bitset<12>>> blocks;
-	//list<string> blocks;
-	//string block;
-	list<bitset<12>> block;
+	list<list<bitset<8>>> blocks;
+	list<bitset<8>> block;
 
-	for (list<bitset<12>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
+	for (list<bitset<8>>::iterator it = binaryChacarcters->begin(); it != binaryChacarcters->end(); it++)
 	{
 		////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REVERSE CHARACTERS LATER, JUST BEFORE TRANSMITTING!!!!!!!!!!!!!!!111
 		////reverse character for transmission of LSB first
@@ -112,40 +133,35 @@ list<frame> FrameMessage(list<bitset<12>> data)
 }
 
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing information on the
+//	Description:Returns a bitset containing information on the
 //				length of the message (the number of characters
 //				contained on each block)
 //
-//	Arguments:	[in]string:block containing all the bits to be
-//						   transmitted
+//	Arguments:	[in]list<bitset<8>>:block containing all the
+//						   bits to be transmitted
 //
-//	Return:		[out]string:string indicating the number of				///////////change
-//							characters in the block. Composed of
-//							7 bits indicating the number and a
-//							parity bit
+//	Return:		[out]bitset<8>:bitset indicating the number of
+//							characters in the block.
 ////////////////////////////////////////////////////////////////
-/*string*/bitset<8> IncludeControlChar(/*string*/ list<bitset<12>> block)
+bitset<8> IncludeControlChar(list<bitset<8>> block)
 {
 	int sizeOfBlock = CountCharsInBlock(block);
 
-	bitset<7> controlChar = bitset<7>(sizeOfBlock);
+	bitset<8> controlChar(sizeOfBlock);
 
-	//maybe not necessary
-	bitset<8> controlCharWithParity = IncludeParityBit(controlChar);
-
-	return controlCharWithParity/*.to_string()*/;
+	return controlChar;
 }
 
 ////////////////////////////////////////////////////////////////
 //	Description:counts how many 8bit characters are in a block
 //
 //	Arguments:	[in]string:block containing all the bits to be
-//						   transmitted								///////change
+//						   transmitted
 //
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(/*string*/ list<bitset<12>> block)
+int CountCharsInBlock(list<bitset<8>> block)
 {
 	int numChars = block.size();
 

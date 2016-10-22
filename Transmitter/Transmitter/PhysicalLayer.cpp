@@ -30,16 +30,12 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 list<bitset<8>> ConvertTextForTransmission(list<char> charList)
 {
-	list<bitset<7>> binaryInfo;
+	list<bitset<8>> binaryInfo;
 	list<bitset<8>> binaryWithParity;
 
 	//convert caracters to binary
 	for (list<char>::iterator it = charList.begin(); it != charList.end(); it++)
 		binaryInfo.push_back(ConvertToBinary(*it));
-
-	//Include parity bits
-	for (list<bitset<7>>::iterator it = binaryInfo.begin(); it != binaryInfo.end(); it++)
-		binaryWithParity.push_back(IncludeParityBit(*it));
 
 	return binaryWithParity;
 }
@@ -52,60 +48,15 @@ list<bitset<8>> ConvertTextForTransmission(list<char> charList)
 //	Return:		[out]bitset<7>: binary code for the char stored
 //								in a 7 bit bitset
 ////////////////////////////////////////////////////////////////
-bitset<7> ConvertToBinary(char C)
+bitset<8> ConvertToBinary(char C)
 {
-	return bitset<7>(C);
+	return bitset<8>(C);
 }
 
-////////////////////////////////////////////////////////////////
-//	Description: appends a binary bit to the end of a 7 bit
-//				 binary code representing a char
-//
-//	Arguments:	[in]bitset<7>: char represented in binary
-//
-//	Return:		[out]bitset<8>: bitset including the 7 bit
-//								representation of the char 
-//								and the parity bit
-////////////////////////////////////////////////////////////////
-bitset<8> IncludeParityBit(bitset<7> binaryChar)
+////////////////////////////////////////////////////////////////////////////////////Describe
+void ConnectSocket(SOCKET &Connection)
 {
-	bitset<8> binaryCharWithParity;
-
-	binaryCharWithParity[0] = IsOddParity(binaryChar);
-
-	for (size_t i = 0; i < binaryChar.size(); i++)
-		binaryCharWithParity[i + 1] = binaryChar[i];
-
-	return binaryCharWithParity;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Calculates whether the input binary character
-//				string has even or odd parity 
-//
-//	Arguments:	[in]bitset<7>: char represented in binary
-//
-//	Return:		[out]bool: indicating if the parity is even or odd
-//	Ret Value:	true if odd parity, false if even parity
-////////////////////////////////////////////////////////////////
-bool IsOddParity(bitset<7> binaryChar)
-{
-	if (binaryChar.count() % 2 == 0)
-		return false; //contains an even number of 1 bits
-	else
-		return true; //contains an odd number of 1 bits
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Starts the client connection and transmits all the
-//				messages composed of binary characters
-//
-//	Arguments:	[in]list<string>: list containing all the messages
-//
-////////////////////////////////////////////////////////////////
-void TransmitMessages(message message, int numOfErrors)
-{
-    //Startup
+	//Startup
 	WSAData wsaData;
 	int sizeOfAddr;
 	WORD DllVersion = MAKEWORD(2, 1);
@@ -121,16 +72,37 @@ void TransmitMessages(message message, int numOfErrors)
 	address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	address.sin_port = htons(1111);
 	address.sin_family = AF_INET;
-	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
 
 	if (connect(Connection, (SOCKADDR*)&address, sizeOfAddr) != 0)
 	{
 		MessageBoxA(NULL, "Failed to Connect", "Error", MB_OK | MB_ICONERROR);
 		return;
 	}
-
-	//Client connected. Transmit messages
+	//Connected
 	cout << "Connected!" << endl;
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Starts the client connection and transmits all the
+//				messages composed of binary characters
+//
+//	Arguments:	[in]list<string>: list containing all the messages
+//
+////////////////////////////////////////////////////////////////
+void TransmitFrames(list<HammingFrame>, int numOfErrors)				/////////hamming overload
+{
+	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
+	list<transmissionError> errorsIntroduced;
+
+
+	///////////////////Find right place///////////////////////////////
+	//Generate Transmission errors
+	if (numOfErrors > 0)
+	{
+		errorsIntroduced = GenerateTransmissionError(message, numOfErrors);
+		PrintList(errorsIntroduced);
+	}
+	//////////////////////////////////////////////////////////////////
 
 	char transmittedMessage[537];
 	char accepted[1] = { '0' };
@@ -176,41 +148,62 @@ void TransmitMessages(message message, int numOfErrors)
 //				in the input parameter in a random position in
 //				the message
 //
-//	Arguments:	[in]int (optional): Number of bits to change.
+//	Arguments:	[in]int (optional): Number of bits to change.			/////hamming overload
 //									Default value: 0.
 //
 ////////////////////////////////////////////////////////////////
-list<transmissionError> GenerateTransmissionError(message &message, int numberOfBitsToChange)
+list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int numberOfBitsToChange)
 {
 	list<transmissionError> errors;
 
 	//Copy the data into data with error
-	CopyDataForErrorGeneration(message);
+	CopyDataForErrorGeneration(frames, framesWithErrors);
 
 	for (int i = 0; i < numberOfBitsToChange; i++)
 	{
-		int frameLocation, byteLocation, bitLocation;
+		int frameLocation, charLocation, bitLocation;
 		transmissionError error;
 		random_device rd;
 
 		//Randomly generate a frame number
-		frameLocation = abs(int(rd())) % message.frames.size();
-		list<frame>::iterator frameIt = next(message.frames.begin(), frameLocation);
+		frameLocation = abs(int(rd())) % framesWithErrors.size();
+		list<HammingFrame>::iterator frameIt = next(framesWithErrors.begin(), frameLocation);
 
-		//Copy the data of the frame
-
-		//Randomly generate a byte number (((((((((((((((((((((((((((Not really a bite but a character)))))))))))))9
-		byteLocation = abs(int(rd())) % (frameIt->data).size(); ////////Error just generated in the data, not in the frame part of the message
-		list<bitset<12>>::iterator byteIt = next(frameIt->errorData.begin(), byteLocation);
-
-		//Randomly generate a bit number
-		bitLocation = abs(int(rd())) % 12;		///////////assuming error just in data
-
-		//Modi
-		byteIt->flip(bitLocation);
+		//Randomly generate a character number
+		charLocation = abs(int(rd())) % ((frameIt->data).size() + 3);
+		
+		//Change in Syn Char
+		if (charLocation == 0)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % 12;
+			frameIt->synChar1.flip(bitLocation);
+		}
+		//Change in Syn Char
+		else if (charLocation == 1)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % 12;
+			frameIt->synChar2.flip(bitLocation);
+		}
+		//Change in Control Char
+		else if (charLocation == 2)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % 12;
+			frameIt->controlChar.flip(bitLocation);
+		}
+		//Change in frame data
+		else
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % 12;
+			list<bitset<12>>::iterator byteIt = next(frameIt->data.begin(), charLocation);
+			byteIt->flip(bitLocation);
+		}
 
 		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
-		error.byteLocation = byteLocation + 1;
+		error.byteLocation = charLocation + 1;
 		error.bitLocation = bitLocation + 1;
 
 		errors.push_back(error);
@@ -219,13 +212,13 @@ list<transmissionError> GenerateTransmissionError(message &message, int numberOf
 	return errors;
 }
 
-void CopyDataForErrorGeneration(message &message)
+void CopyDataForErrorGeneration(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors)		//hamming overload
 {
-	for (list<frame>::iterator it = message.frames.begin(); it != message.frames.end(); it++)
-		it->errorData = it->data;
+	for (list<HammingFrame>::iterator it = frames.begin(); it != frames.end(); it++)
+		framesWithErrors.push_back(*it);
 }
 
-list<bitset<12>> GenerateHamming(list<bitset<8>> data)
+list<bitset<12>> GenerateHammingForData(list<bitset<8>> data)
 {
 	list<bitset<12>> dataWithHamming;
 
@@ -244,15 +237,7 @@ bitset<12> CalculateHammingCode(bitset<8> byteOfData)
 	return byteWithHamming;
 }
 
-void GenerateCRC(list<frame> &frames)
-{
-	for (list<frame>::iterator it = frames.begin(); it != frames.end(); it++)
-	{
-		CalculateCRC(*it);
-	}
-}
-
-void CalculateCRC(frame &frame)
+void CalculateCRC(CRCFrame &frame)
 {
 
 }

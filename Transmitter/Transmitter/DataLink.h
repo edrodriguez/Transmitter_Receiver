@@ -26,17 +26,30 @@ using namespace std;
 //	Return:		[out]list<string>:list of strings containing
 //								  all the framed messages
 ////////////////////////////////////////////////////////////////
-list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
+void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frame);  //hamming overload
 
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing 22(decimal) in
-//				binary as well as a parity bit appended at the
-//				end of the string
+//	Description:generates a list of string with each entry
+//				containing a string representing a message. Each
+//				one containing two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message) and up to 64 information characters			////////////////change
 //
-//	Return:		[out]string: binary code for 22 with a parity
-//							 bit
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in a binary bitset
+//
+//	Return:		[out]list<string>:list of strings containing
+//								  all the framed messages
 ////////////////////////////////////////////////////////////////
-/*string*/ bitset<8> IncludeSynChar();
+void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frame); //crc overload
+
+////////////////////////////////////////////////////////////////
+//	Description:Returns a string containing the ASCII Syn char
+//				22(decimal) in binary							
+//
+//	Return:		[out]bitset<8>: 8 bit binary code for 22
+////////////////////////////////////////////////////////////////
+bitset<8> IncludeSynChar();
 
 ////////////////////////////////////////////////////////////////
 //	Description:separates the bitsets in groups of 64
@@ -44,26 +57,24 @@ list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 //	Arguments:	[in]list<bitset<8>>:list of characters expressed
 //									in a binary bitset
 //
-//	Return:		[out]list<string>:list of strings containing
-//								  the bitsets separated in
-//								  groups of 64
+//	Return:		[out]list<list<bitset<8>>: A list of 
+//						lists of bitsets containing the bitsets
+//						separated in groups of 64
 ////////////////////////////////////////////////////////////////
-/*list<string>*/ list<list<bitset<12>>> SeparateInBlocks(list<bitset<12>> *binaryChacarcters);
+list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
 
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing information on the
+//	Description:Returns a bitset containing information on the
 //				length of the message (the number of characters
 //				contained on each block)
 //
-//	Arguments:	[in]string:block containing all the bits to be
-//						   transmitted
+//	Arguments:	[in]list<bitset<8>>:block containing all the
+//						   bits to be transmitted
 //
-//	Return:		[out]string:string indicating the number of 
-//							characters in the block. Composed of				//////////change
-//							7 bits indicating the number and a
-//							parity bit
+//	Return:		[out]bitset<8>:bitset indicating the number of
+//							characters in the block.
 ////////////////////////////////////////////////////////////////
-/*string*/ bitset<8> IncludeControlChar(/*string*/ list<bitset<12>> block);
+bitset<8> IncludeControlChar(list<bitset<8>> block);
 
 ////////////////////////////////////////////////////////////////
 //	Description:counts how many 8bit characters are in a block
@@ -74,4 +85,4 @@ list<frame/*string*/> FrameMessage(list<bitset<12>> binaryChacarcters);
 //	Return:		[out]int:number of 8 bit characters contained
 //						 in the block
 ////////////////////////////////////////////////////////////////
-int CountCharsInBlock(/*string*/  list<bitset<12>> block);
+int CountCharsInBlock(list<bitset<8>> block);

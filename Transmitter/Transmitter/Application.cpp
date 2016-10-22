@@ -88,21 +88,27 @@ void PrintList(list<bitset<12>> l)
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<frame> l, int numOfErrors)
+void PrintList(list<HammingFrame> l)
 {
-
-	for (list<frame>::iterator it = l.begin(); it != l.end(); it++)
+	for (list<HammingFrame>::iterator it = l.begin(); it != l.end(); it++)
 	{
 		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
-
-		if (numOfErrors == 0)
-			PrintList(it->data);
-		else
-			PrintList(it->errorData);
-
-		cout << it->CRCCode;
+		PrintList(it->data);
 	}
-
+	
+	cout << endl;
+}
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<CRCFrame> l, int numOfErrors = 0)
+{
+	for (list<CRCFrame>::iterator it = l.begin(); it != l.end(); it++)
+	{
+		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
+		PrintList(it->data);
+		cout << ' ' << it->CRCCode;
+	}
 	cout << endl;
 }
 /////////////////////

@@ -43,7 +43,11 @@ void PrintList(list<bitset<12>> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<frame> l, int numOfErrors = 0);
+void PrintList(list<HammingFrame> l);
+/////////////////////
+////Auxiliary method for printing list
+////////////////////
+void PrintList(list<CRCFrame> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
