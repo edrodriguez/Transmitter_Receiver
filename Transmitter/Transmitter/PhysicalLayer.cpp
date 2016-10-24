@@ -32,13 +32,12 @@ using namespace std;
 list<bitset<8>> ConvertTextForTransmission(list<char> charList)
 {
 	list<bitset<8>> binaryInfo;
-	list<bitset<8>> binaryWithParity;
 
 	//convert caracters to binary
 	for (list<char>::iterator it = charList.begin(); it != charList.end(); it++)
 		binaryInfo.push_back(ConvertToBinary(*it));
 
-	return binaryWithParity;
+	return binaryInfo;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -92,9 +91,12 @@ void ConnectSocket(SOCKET &Connection)
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamming overload
 {
-	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
+	//SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
 	list<transmissionError> errorsIntroduced;
 	list<HammingFrame> framesWithErrors;
+	char transmittedMessage[805];
+	char accepted[1] = { '0' };
+	char finalMessage[805] = "Done";
 
 	//Generate Transmission errors
 	if (numOfErrors > 0)
@@ -103,27 +105,45 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 		PrintList(errorsIntroduced);
 	}
 
-	//char transmittedMessage[805];
-	char accepted[1] = { '0' };
-	char finalMessage[537] = "Done";
+	//Connect Socket
+	//Startup
+	WSAData wsaData;
+	int sizeOfAddr;
+	WORD DllVersion = MAKEWORD(2, 1);
+
+	if (WSAStartup(DllVersion, &wsaData) != 0)
+	{
+		MessageBoxA(NULL, "Winsock startup failed", "Error", MB_OK | MB_ICONERROR);
+		exit(1);
+	}
+
+	SOCKADDR_IN address;
+	sizeOfAddr = sizeof(address);
+	address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	address.sin_port = htons(1111);
+	address.sin_family = AF_INET;
+	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
+
+	if (connect(Connection, (SOCKADDR*)&address, sizeOfAddr) != 0)
+	{
+		MessageBoxA(NULL, "Failed to Connect", "Error", MB_OK | MB_ICONERROR);
+		return;
+	}
+	//Connected
+	cout << "Connected!" << endl;
+	////////////
 
 	for (list<HammingFrame>::iterator it = frames.begin(); it != frames.end(); it++)
 	{
-		///Convert frame into string
-		///mes.copy(transmittedMessage, mes.length(), 0);
-		///message[mes.length()] = NULL;
-
-		//string mes = *it;
-		//mes.copy(transmittedMessage, mes.length(), 0);
-		//message[mes.length()] = NULL;
-
+		string frame = FrameToString(*it);
+		frame.copy(transmittedMessage, frame.length(), 0);
+		transmittedMessage[frame.length()] = NULL;
 
 		cout << "Sending Frames: " << endl;
 		if (numOfErrors != 0)
 			;//send message with errors
 		else
-			;//send correct message
-		//send(Connection, transmittedMessage, sizeof(message), NULL); //send message
+			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);//send correct message
 		
 		do
 		{

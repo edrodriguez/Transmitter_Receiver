@@ -129,3 +129,19 @@ void PrintList(list<transmissionError> l)
 	}
 	cout << endl;
 }
+
+///////////////////////////////////////////////////////////description
+string FrameToString(HammingFrame frame)
+{
+	string frameString = frame.synChar1.to_string() + frame.synChar2.to_string() +
+		frame.controlChar.to_string();
+
+	string dataString = "";
+
+	for (list<bitset<12>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+		dataString.append(it->to_string());
+
+	frameString.append(dataString);
+
+	return frameString;
+}

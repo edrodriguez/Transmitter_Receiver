@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 				PrintList(HammingFrames);
 
 				//Reverse characters
-				//TransmitMessages(message, mode, numOfErrors);
+				TransmitFrames(HammingFrames, numOfErrors);
 			}
 		}
 	}

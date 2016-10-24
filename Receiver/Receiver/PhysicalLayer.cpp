@@ -61,7 +61,7 @@ void ReceiveMessages()
 		char accepted[1] = { 1 };
 		char rejected[1] = { 0 };
 
-		char M[537];
+		char M[805];
 		list<char> finalMessage = { 'D','o','n','e' };
 		list<char> message;
 
@@ -98,15 +98,16 @@ void ReceiveMessages()
 					messageString.append(1u, *it);
 
 				//convert the string into binary bitsets
-				list<bitset<8>> binaryCharacters;
-				binaryCharacters = ConvertToBitsets(messageString);
+				list<bitset<12>> FrameWithHamming;
+				FrameWithHamming = ConvertToBitsets(messageString);
 
-				if (IsMessageValid(binaryCharacters))
+				if (IsMessageValid(FrameWithHamming))
 				{
 
 					list<char> convertedMessage;
-					binaryCharacters = DeFrame(binaryCharacters);
-					convertedMessage = ConvertBinaryMessage(binaryCharacters);
+					list<bitset<8>> deFramedData;
+					deFramedData = DeFrame(FrameWithHamming);
+					convertedMessage = ConvertBinaryMessage(deFramedData);
 
 					//print message
 					PrintList(convertedMessage);
@@ -132,34 +133,34 @@ void ReceiveMessages()
 //	Arguments:	[in]string: message
 //
 //	Return:		[out]list<bitset<8>>:list of bitsets representing
-//									 the message
+//									 the message						//////////
 ////////////////////////////////////////////////////////////////
-list<bitset<8>> ConvertToBitsets(string message)
+list<bitset<12>> ConvertToBitsets(string message)
 {
-	list<bitset<8>> binaryCharacters;
+	list<bitset<12>> binaryCharacters;
 
 	//get syn chars
-	for (int i = 0; i < 16; i += 8)
+	for (int i = 0; i < 24; i += 12)
 	{
-		string synCharacter = message.substr(i, 8);
-		bitset<8> binaryCharacter(synCharacter);
+		string synCharacter = message.substr(i, 12);
+		bitset<12> binaryCharacter(synCharacter);
 		binaryCharacters.push_back(binaryCharacter);
 	}
 
 	//get control char
-	string controlCharacter = message.substr(16, 8);
-	bitset<8> binaryCharacter(controlCharacter);
+	string controlCharacter = message.substr(24, 12);
+	bitset<12> binaryCharacter(controlCharacter);
 	binaryCharacters.push_back(binaryCharacter);
 
-	for (size_t i = 24; i < message.size(); i += 8)
+	for (size_t i = 36; i < message.size(); i += 12)
 	{
-		string character = message.substr(i, 8);
+		string character = message.substr(i, 12);
 
 		//reverse character because it was received by LSB first
-		bitset<8> reversedBinaryCharacter(character);
-		bitset<8> binaryCharacter;
-		for (size_t j = 0; j < reversedBinaryCharacter.size(); j++)
-			binaryCharacter[binaryCharacter.size() - 1 - j] = (reversedBinaryCharacter)[j];
+		//bitset<8> reversedBinaryCharacter(character);
+		bitset<12> binaryCharacter(character);
+		//for (size_t j = 0; j < reversedBinaryCharacter.size(); j++)
+			//binaryCharacter[binaryCharacter.size() - 1 - j] = (reversedBinaryCharacter)[j];
 
 		binaryCharacters.push_back(binaryCharacter);
 	}
@@ -178,10 +179,10 @@ list<bitset<8>> ConvertToBitsets(string message)
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsMessageValid(list<bitset<8>> binaryCharacters)
+bool IsMessageValid(list<bitset<12>> binaryCharacters)
 {
-	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-		if (!CheckParity(*it))
+	for (list<bitset<12>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
+		if (!CheckHammingParity(*it))
 			return false;
 	return true;
 }
@@ -197,33 +198,97 @@ bool IsMessageValid(list<bitset<8>> binaryCharacters)
 //						  correct parity bit
 //	Ret Value:	true if correct parity, false if incorrect
 ////////////////////////////////////////////////////////////////
-bool CheckParity(bitset<8> binaryChar)
+bool CheckHammingParity(bitset<12> binaryChar)
 {
-	bitset<7> charWithoutParityBit;
+	bitset<12> byteWithHamming;
+	int parityCount = 0;
+	int parityBitLocation = 0;
+	int checkIndex = 0;
 
-	//LSB is the parity bit
-	int parityBit = binaryChar[0];
-	
-	//remove remove parity bit
-	for (size_t i = 1; i <= binaryChar.size() - 1; i++)
-		charWithoutParityBit[i - 1] = binaryChar[i];
-
-	//supposed odd parity
-	if (parityBit == 1)
+	//Check parity bit 1 (p1)
+	parityBitLocation = byteWithHamming.size() - 1;
+	checkIndex = parityBitLocation;
+	do
 	{
-		//check remaining message for an odd number of 1s
-		if (charWithoutParityBit.count() % 2 == 1)
-			return true;
-	}
-	//supposed even parity
-	else if (parityBit == 0)
-	{
-		//check remaining message for an even number of 1s
-		if (charWithoutParityBit.count() % 2 == 0)
-			return true;
-	}
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		checkIndex -= 2;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		return false;
 
-	return false;
+	//Calculate parity bit 2 (p2)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 2;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (byteWithHamming[checkIndex - 1] == 1 && checkIndex >= 0)
+			parityCount++;
+		checkIndex -= 4;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		return false;
+
+	//Calculate parity bit 4 (p4)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 4;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (checkIndex - 1 >= 0)
+			if (byteWithHamming[checkIndex - 1])
+				parityCount++;
+		if (checkIndex - 2 >= 0)
+			if (byteWithHamming[checkIndex - 2])
+				parityCount++;
+		if (checkIndex - 3 >= 0)
+			if (byteWithHamming[checkIndex - 3])
+				parityCount++;
+		checkIndex -= 8;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		return false;
+
+	//Calculate parity bit 8 (p8)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 8;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (checkIndex - 1 >= 0)
+			if (byteWithHamming[checkIndex - 1])
+				parityCount++;
+		if (checkIndex - 2 >= 0)
+			if (byteWithHamming[checkIndex - 2])
+				parityCount++;
+		if (checkIndex - 3 >= 0)
+			if (byteWithHamming[checkIndex - 3])
+				parityCount++;
+		if (checkIndex - 4 >= 0)
+			if (byteWithHamming[checkIndex - 4])
+				parityCount++;
+		if (checkIndex - 5 >= 0)
+			if (byteWithHamming[checkIndex - 5])
+				parityCount++;
+		if (checkIndex - 6 >= 0)
+			if (byteWithHamming[checkIndex - 6])
+				parityCount++;
+		if (checkIndex - 7 >= 0)
+			if (byteWithHamming[checkIndex - 7])
+				parityCount++;
+		checkIndex -= 16;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		return false;
+
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -242,7 +307,7 @@ list<char> ConvertBinaryMessage(list< bitset<8>> binaryCharacters)
 	list<char> convertedMessage;
 
 	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-		convertedMessage.push_back(ConvertBinaryToChar(*it));
+		convertedMessage.push_back(it->to_ulong());
 
 	return convertedMessage;
 }

@@ -21,4 +21,4 @@ using namespace std;
 //	Return:		[out]list<bitset<8>>:list of bitsets without
 //									the syn and control characters
 ////////////////////////////////////////////////////////////////
-list<bitset<8>> DeFrame(list<bitset<8>> binaryMessage);
+list<bitset<8>> DeFrame(list<bitset<12>> binaryMessage);

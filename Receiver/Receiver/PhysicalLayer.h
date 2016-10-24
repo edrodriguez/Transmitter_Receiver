@@ -25,10 +25,10 @@ void ReceiveMessages();
 //
 //	Arguments:	[in]string: message
 //
-//	Return:		[out]list<bitset<8>>:list of bitsets representing
+//	Return:		[out]list<bitset<8>>:list of bitsets representing				///////////
 //									 the message
 ////////////////////////////////////////////////////////////////
-list<bitset<8>> ConvertToBitsets(string message);
+list<bitset<12>> ConvertToBitsets(string message);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the message had no transmission
@@ -41,7 +41,7 @@ list<bitset<8>> ConvertToBitsets(string message);
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsMessageValid(list<bitset<8>> binaryCharacters);
+bool IsMessageValid(list<bitset<12>> binaryCharacters);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the parity bit of the input bitset
@@ -53,7 +53,7 @@ bool IsMessageValid(list<bitset<8>> binaryCharacters);
 //						  correct parity bit
 //	Ret Value:	true if correct parity, false if incorrect
 ////////////////////////////////////////////////////////////////
-bool CheckParity(bitset<8> binaryChar);
+bool CheckHammingParity(bitset<12> binaryChar);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Converts a list of bitsets into a list of
