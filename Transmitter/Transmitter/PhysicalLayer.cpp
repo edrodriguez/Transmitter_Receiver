@@ -103,7 +103,7 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 		PrintList(errorsIntroduced);
 	}
 
-	char transmittedMessage[805];
+	//char transmittedMessage[805];
 	char accepted[1] = { '0' };
 	char finalMessage[537] = "Done";
 
@@ -231,11 +231,109 @@ list<bitset<12>> GenerateHammingForData(list<bitset<8>> data)
 bitset<12> CalculateHammingCode(bitset<8> byteOfData)
 {
 	bitset<12> byteWithHamming;
+	int parityCount = 0;
+	int parityBitLocation = 0;
+	int checkIndex = 0;
+
+	//Copy bits in the right positions (p1 p2 b1 p4 b2 b3 b4 p8 b5 b6 b7 b8)
+	for (size_t i = 0; i < 4; i++)
+	{
+		byteWithHamming[i] = byteOfData[i];
+	}
+	for (size_t i = 5; i < 8; i++)
+	{
+		byteWithHamming[i] = byteOfData[i - 1];
+	}
+	byteWithHamming[9] = byteOfData[7];
+
+	//Calculate parity bit 1 (p1)
+	parityBitLocation = byteWithHamming.size() - 1;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		checkIndex -= 2;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		byteWithHamming.set(parityBitLocation);
+
+	//Calculate parity bit 2 (p2)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 2;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (byteWithHamming[checkIndex - 1] == 1 && checkIndex >= 0)
+			parityCount++;
+		checkIndex -= 4;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		byteWithHamming.set(parityBitLocation);
+
+	//Calculate parity bit 4 (p4)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 4;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (checkIndex - 1 >= 0)
+			if (byteWithHamming[checkIndex - 1])
+				parityCount++;
+		if (checkIndex - 2 >= 0)
+			if (byteWithHamming[checkIndex - 2])
+				parityCount++;
+		if (checkIndex - 3 >= 0)
+			if (byteWithHamming[checkIndex - 3])
+				parityCount++;
+		checkIndex -= 8;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		byteWithHamming.set(parityBitLocation);
+
+	//Calculate parity bit 8 (p8)
+	parityCount = 0;
+	parityBitLocation = byteWithHamming.size() - 8;
+	checkIndex = parityBitLocation;
+	do
+	{
+		if (byteWithHamming[checkIndex] == 1)
+			parityCount++;
+		if (checkIndex - 1 >= 0)
+			if (byteWithHamming[checkIndex - 1])
+				parityCount++;
+		if (checkIndex - 2 >= 0)
+			if (byteWithHamming[checkIndex - 2])
+				parityCount++;
+		if (checkIndex - 3 >= 0)
+			if (byteWithHamming[checkIndex - 3])
+				parityCount++;
+		if (checkIndex - 4 >= 0)
+			if (byteWithHamming[checkIndex - 4])
+				parityCount++;
+		if (checkIndex - 5 >= 0)
+			if (byteWithHamming[checkIndex - 5])
+				parityCount++;
+		if (checkIndex - 6 >= 0)
+			if (byteWithHamming[checkIndex - 6])
+				parityCount++;
+		if (checkIndex - 7 >= 0)
+			if (byteWithHamming[checkIndex - 7])
+				parityCount++;
+		checkIndex -= 16;
+	} while (checkIndex >= 0);
+	if (parityCount % 2 == 1) //odd parity
+		byteWithHamming.set(parityBitLocation);
 
 	return byteWithHamming;
 }
 
 void CalculateCRC(CRCFrame &frame)
 {
-
+	bitset<17> CRCANSI("11000000000000101");
+	int sizeOfCRCCode = frame.data.size() + 3;
 }

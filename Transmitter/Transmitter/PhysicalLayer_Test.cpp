@@ -3,16 +3,20 @@
 #include <bitset>
 #include <iostream>
 
-//void RunPhysicalLayerTests()
-//{
-//	cout << "Running Physical Layer Tests:" << endl;
-//	ConvertToBinary_InputA_Returns1000001();
-//	ConvertToBinary_Inputa_Returns1100001();
-//	ConvertToBinary_Input0_Returns0110000();
-//	ConvertToBinary_Input$_Returns0100100();
-//	IsOddParity_Input1000001_ReturnFalse();
-//	IsOddParity_Input1100001_ReturnTrue();
-//}
+void RunPhysicalLayerTests()
+{
+	cout << "Running Physical Layer Tests:" << endl;
+	//ConvertToBinary_InputA_Returns1000001();
+	//ConvertToBinary_Inputa_Returns1100001();
+	//ConvertToBinary_Input0_Returns0110000();
+	//ConvertToBinary_Input$_Returns0100100();
+	//IsOddParity_Input1000001_ReturnFalse();
+	//IsOddParity_Input1100001_ReturnTrue();
+	CalculateHammingCode_Input00000000_Return000000000000();
+	CalculateHammingCode_Input10010001_Return001000110001();
+	CalculateHammingCode_Input11111111_Return111011101111();
+
+}
 
 //void ConvertToBinary_InputA_Returns1000001()
 //{
@@ -111,3 +115,45 @@
 //
 //	cout << input << endl;
 //}
+
+void CalculateHammingCode_Input00000000_Return000000000000()
+{
+	bitset<8> input("00000000");
+	bitset<12> expectedOutput("000000000000");
+	bitset<12> actualOutput;
+	
+	actualOutput = CalculateHammingCode(input);
+	
+	if (actualOutput == expectedOutput)
+		std::cout << "Test CalculateHammingCode_Input00000000_Return000000000000 PASSED" << endl;
+	else
+		std::cout << "Test CalculateHammingCode_Input00000000_Return000000000000 FAILED" << endl;
+}
+
+void CalculateHammingCode_Input10010001_Return001000110001()
+{
+	bitset<8> input("10010001");
+	bitset<12> expectedOutput("001000110001");
+	bitset<12> actualOutput;
+
+	actualOutput = CalculateHammingCode(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test CalculateHammingCode_Input10010001_Return001000110001 PASSED" << endl;
+	else
+		std::cout << "Test CalculateHammingCode_Input10010001_Return001000110001 FAILED" << endl;
+}
+
+void CalculateHammingCode_Input11111111_Return111011101111()
+{
+	bitset<8> input("11111111");
+	bitset<12> expectedOutput("111011101111");
+	bitset<12> actualOutput;
+
+	actualOutput = CalculateHammingCode(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 PASSED" << endl;
+	else
+		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 FAILED" << endl;
+}

@@ -15,3 +15,10 @@ void IsOddParity_Input1000001_ReturnFalse();
 void IsOddParity_Input1100001_ReturnTrue();
 
 void GenerateTransmissionError_Input000000000001_ReturnChangeInOneBit();
+
+void CalculateHammingCode_Input00000000_Return000000000000();
+
+void CalculateHammingCode_Input10010001_Return001000110001();
+
+void CalculateHammingCode_Input11111111_Return111011101111();
+

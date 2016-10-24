@@ -5,8 +5,12 @@
 //				This layer is in charge of converting the
 //				message to binary and transmitting it
 ////////////////////////////////////////////////////////////////
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#pragma comment(lib,"ws2_32.lib")
+#include <WinSock2.h>
 #include <string>
 #include <list>
+#include <vector>
 #include <bitset>
 
 using namespace std;
@@ -17,7 +21,7 @@ struct CRCFrame
 	bitset<8> synChar2;
 	bitset<8> controlChar;
 	list<bitset<8>> data;
-	string CRCCode;
+	vector<bool> CRCCode;
 };
 
 struct HammingFrame

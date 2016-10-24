@@ -8,7 +8,7 @@
 #include "PhysicalLayer.h"
 #include <fstream>
 #include <string>
-#include <iostream> //maybe not necessary if no in out to console
+#include <iostream>
 #include <list>
 #include <bitset>
 
@@ -107,7 +107,9 @@ void PrintList(list<CRCFrame> l, int numOfErrors = 0)
 	{
 		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
 		PrintList(it->data);
-		cout << ' ' << it->CRCCode;
+		cout << ' ';
+		for (std::vector<bool>::const_iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); ++i)
+			std::cout << *i;
 	}
 	cout << endl;
 }
