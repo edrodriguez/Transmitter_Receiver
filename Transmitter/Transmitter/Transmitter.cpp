@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 
 			if (mode == "-crc")
 			{
+				cout << "-------------Transmitter Running in CRC Mode-------------" << endl;
 				list<CRCFrame> CRCFrames;
 				//frame and crc calculation
 				FrameMessage(binaryData, CRCFrames);
@@ -74,11 +75,12 @@ int main(int argc, char* argv[])
 			}
 			else if (mode == "-hamming")
 			{
+				cout << "------------Transmitter Running in Hamming Mode------------" << endl;
 				list<HammingFrame> HammingFrames;
 				//frame and hamming calculation
 				FrameMessage(binaryData, HammingFrames);
 
-				cout << "-------------------Frames With Hamming-------------------" << endl;
+				cout << "--------------------Frames With Hamming--------------------" << endl;
 				PrintList(HammingFrames);
 
 				//Reverse characters

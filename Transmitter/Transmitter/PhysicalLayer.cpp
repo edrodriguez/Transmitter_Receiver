@@ -91,22 +91,13 @@ void ConnectSocket(SOCKET &Connection)
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamming overload
 {
-	//SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
 	list<transmissionError> errorsIntroduced;
 	list<HammingFrame> framesWithErrors;
 	char transmittedMessage[805];
 	char accepted[1] = { '0' };
 	char finalMessage[805] = "Done";
 
-	//Generate Transmission errors
-	if (numOfErrors > 0)
-	{
-		errorsIntroduced = GenerateTransmissionError(frames, framesWithErrors, numOfErrors);
-		PrintList(errorsIntroduced);
-	}
-
 	//Connect Socket
-	//Startup
 	WSAData wsaData;
 	int sizeOfAddr;
 	WORD DllVersion = MAKEWORD(2, 1);
@@ -131,32 +122,75 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 	}
 	//Connected
 	cout << "Connected!" << endl;
-	////////////
 
-	for (list<HammingFrame>::iterator it = frames.begin(); it != frames.end(); it++)
+	//Generate and send messages with errors
+	if (numOfErrors > 0)
 	{
-		string frame = FrameToString(*it);
-		frame.copy(transmittedMessage, frame.length(), 0);
-		transmittedMessage[frame.length()] = NULL;
+		errorsIntroduced = GenerateTransmissionError(frames, framesWithErrors, numOfErrors);
+		PrintList(errorsIntroduced);
+		PrintList(framesWithErrors);
 
-		cout << "Sending Frames: " << endl;
-		if (numOfErrors != 0)
-			;//send message with errors
-		else
-			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);//send correct message
-		
-		do
+		cout << "Sending " << framesWithErrors.size() <<" Frames: " << endl;
+
+		for (list<HammingFrame>::iterator dataIt = frames.begin(), errorIt = framesWithErrors.begin();
+			dataIt != frames.end() && errorIt != framesWithErrors.end(); dataIt++, errorIt++)
 		{
-			recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+			string errorFrame, realFrame;
+			
+			errorFrame = FrameToString(*errorIt);
+			errorFrame.copy(transmittedMessage, errorFrame.length(), 0);
+			transmittedMessage[errorFrame.length()] = NULL;
+			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 
-			if (accepted[0] == 1)
-				cout << "--------------------Accepted Message-------------------" << endl;
-			else
+			int retryCount = 0;
+			do
 			{
-				cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
-				//send correct message
-			}
-		} while (accepted[0] == 0);
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+
+				if (accepted[0] == 1)
+					cout << "--------------------Accepted Message-------------------" << endl;
+				else
+				{
+					cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
+					cout << "----------------Retransmitting Message-----------------" << endl;
+					realFrame = FrameToString(*dataIt);
+					realFrame.copy(transmittedMessage, realFrame.length(), 0);
+					transmittedMessage[realFrame.length()] = NULL;
+					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+				}
+			} while (accepted[0] == 0 && retryCount < 5);
+		}
+	}
+	//Send only messages without errors
+	else
+	{
+		cout << "Sending " << frames.size() << " Frames: " << endl;
+
+		for (list<HammingFrame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
+		{
+			string  frame;
+
+			frame = FrameToString(*dataIt);
+			frame.copy(transmittedMessage, frame.length(), 0);
+			transmittedMessage[frame.length()] = NULL;
+			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+
+			int retryCount = 0;
+			do
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+
+				if (accepted[0] == 1)
+					cout << "----------------------Accepted Message---------------------" << endl;
+				else
+				{
+					retryCount++;
+					cout << "----Message Contained Errors and Could Not Be Corrected----" << endl;
+					cout << "------------------Retransmitting Message-------------------" << endl;
+					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+				}
+			} while (accepted[0] == 0 && retryCount < 5);
+		}
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }

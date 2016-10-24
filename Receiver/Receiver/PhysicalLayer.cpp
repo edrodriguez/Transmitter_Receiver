@@ -200,17 +200,16 @@ bool IsMessageValid(list<bitset<12>> binaryCharacters)
 ////////////////////////////////////////////////////////////////
 bool CheckHammingParity(bitset<12> binaryChar)
 {
-	bitset<12> byteWithHamming;
 	int parityCount = 0;
 	int parityBitLocation = 0;
 	int checkIndex = 0;
 
 	//Check parity bit 1 (p1)
-	parityBitLocation = byteWithHamming.size() - 1;
+	parityBitLocation = binaryChar.size() - 1;
 	checkIndex = parityBitLocation;
 	do
 	{
-		if (byteWithHamming[checkIndex] == 1)
+		if (binaryChar[checkIndex] == 1)
 			parityCount++;
 		checkIndex -= 2;
 	} while (checkIndex >= 0);
@@ -219,13 +218,13 @@ bool CheckHammingParity(bitset<12> binaryChar)
 
 	//Calculate parity bit 2 (p2)
 	parityCount = 0;
-	parityBitLocation = byteWithHamming.size() - 2;
+	parityBitLocation = binaryChar.size() - 2;
 	checkIndex = parityBitLocation;
 	do
 	{
-		if (byteWithHamming[checkIndex] == 1)
+		if (binaryChar[checkIndex] == 1)
 			parityCount++;
-		if (byteWithHamming[checkIndex - 1] == 1 && checkIndex >= 0)
+		if (binaryChar[checkIndex - 1] == 1 && checkIndex >= 0)
 			parityCount++;
 		checkIndex -= 4;
 	} while (checkIndex >= 0);
@@ -234,20 +233,20 @@ bool CheckHammingParity(bitset<12> binaryChar)
 
 	//Calculate parity bit 4 (p4)
 	parityCount = 0;
-	parityBitLocation = byteWithHamming.size() - 4;
+	parityBitLocation = binaryChar.size() - 4;
 	checkIndex = parityBitLocation;
 	do
 	{
-		if (byteWithHamming[checkIndex] == 1)
+		if (binaryChar[checkIndex] == 1)
 			parityCount++;
 		if (checkIndex - 1 >= 0)
-			if (byteWithHamming[checkIndex - 1])
+			if (binaryChar[checkIndex - 1])
 				parityCount++;
 		if (checkIndex - 2 >= 0)
-			if (byteWithHamming[checkIndex - 2])
+			if (binaryChar[checkIndex - 2])
 				parityCount++;
 		if (checkIndex - 3 >= 0)
-			if (byteWithHamming[checkIndex - 3])
+			if (binaryChar[checkIndex - 3])
 				parityCount++;
 		checkIndex -= 8;
 	} while (checkIndex >= 0);
@@ -256,32 +255,32 @@ bool CheckHammingParity(bitset<12> binaryChar)
 
 	//Calculate parity bit 8 (p8)
 	parityCount = 0;
-	parityBitLocation = byteWithHamming.size() - 8;
+	parityBitLocation = binaryChar.size() - 8;
 	checkIndex = parityBitLocation;
 	do
 	{
-		if (byteWithHamming[checkIndex] == 1)
+		if (binaryChar[checkIndex] == 1)
 			parityCount++;
 		if (checkIndex - 1 >= 0)
-			if (byteWithHamming[checkIndex - 1])
+			if (binaryChar[checkIndex - 1])
 				parityCount++;
 		if (checkIndex - 2 >= 0)
-			if (byteWithHamming[checkIndex - 2])
+			if (binaryChar[checkIndex - 2])
 				parityCount++;
 		if (checkIndex - 3 >= 0)
-			if (byteWithHamming[checkIndex - 3])
+			if (binaryChar[checkIndex - 3])
 				parityCount++;
 		if (checkIndex - 4 >= 0)
-			if (byteWithHamming[checkIndex - 4])
+			if (binaryChar[checkIndex - 4])
 				parityCount++;
 		if (checkIndex - 5 >= 0)
-			if (byteWithHamming[checkIndex - 5])
+			if (binaryChar[checkIndex - 5])
 				parityCount++;
 		if (checkIndex - 6 >= 0)
-			if (byteWithHamming[checkIndex - 6])
+			if (binaryChar[checkIndex - 6])
 				parityCount++;
 		if (checkIndex - 7 >= 0)
-			if (byteWithHamming[checkIndex - 7])
+			if (binaryChar[checkIndex - 7])
 				parityCount++;
 		checkIndex -= 16;
 	} while (checkIndex >= 0);

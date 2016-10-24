@@ -92,7 +92,7 @@ void PrintList(list<HammingFrame> l)
 {
 	for (list<HammingFrame>::iterator it = l.begin(); it != l.end(); it++)
 	{
-		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
+		cout << it->synChar1 << ' ' << it->synChar2 << ' ' << it->controlChar << ' ';
 		PrintList(it->data);
 	}
 	
@@ -118,13 +118,13 @@ void PrintList(list<CRCFrame> l, int numOfErrors = 0)
 ////////////////////
 void PrintList(list<transmissionError> l)
 {
-	cout << "---------------" << l.size() << " Errors Introduced---------------" << endl;
+	cout << "--------------------" << l.size() << " Errors Introduced--------------------" << endl;
 
 	for (list<transmissionError>::iterator it = l.begin(); it != l.end(); it++)
 	{
 		cout << "*Error:" << endl;
 		cout << "\t-Frame: " << it->frameLocation << endl;;
-		cout << "\t-Byte: " << it->byteLocation << endl;;
+		cout << "\t-Character: " << it->byteLocation << endl;;
 		cout << "\t-Bit: " << it->bitLocation << endl;;
 	}
 	cout << endl;
