@@ -17,7 +17,11 @@ using namespace std;
 //				the validity of the messages and printing out
 //				the messages to the console
 ////////////////////////////////////////////////////////////////
-void ReceiveMessages();
+
+
+void ReceiveHammingMessage();
+
+void ReceiveCRCMessage();
 
 ////////////////////////////////////////////////////////////////
 //	Description:Separates a string of binary characters into
@@ -31,6 +35,17 @@ void ReceiveMessages();
 list<bitset<12>> ConvertToBitsets(string message);
 
 ////////////////////////////////////////////////////////////////
+//	Description:Separates a string of binary characters into
+//				8 bit bitsets
+//
+//	Arguments:	[in]string: message
+//
+//	Return:		[out]list<bitset<8>>:list of bitsets representing				///////////
+//									 the message
+////////////////////////////////////////////////////////////////
+list<bool> ConvertToBoolList(string message);
+
+////////////////////////////////////////////////////////////////
 //	Description:Checks that the message had no transmission
 //				errors. This will be expanded in future milestones
 //
@@ -41,7 +56,23 @@ list<bitset<12>> ConvertToBitsets(string message);
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsMessageValid(list<bitset<12>> binaryCharacters);
+bool IsHammingValid(list<bitset<12>> binaryCharacters);
+
+////////////////////////////////////////////////////////////////
+//	Description:Checks that the message had no transmission
+//				errors. This will be expanded in future milestones
+//
+//	Arguments:	[in]list<bitset<8>>:list of bitsets representing
+//									 the message
+//
+//	Return:		[out]bool:indicates if the message is valid
+//						  or not
+//	Ret Value:	true if valid message, false if invalid
+////////////////////////////////////////////////////////////////
+bool IsCRCValid(list<bool> binaryCharacters);
+
+///////////////////////////////////////////////
+list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the parity bit of the input bitset

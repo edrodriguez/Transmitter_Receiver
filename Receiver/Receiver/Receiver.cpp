@@ -18,22 +18,26 @@ int main(int argc, const char* argv[])
 	//Check if the application will be run in test mode
 	if (argv[1] != nullptr)
 	{
-		string testMode = argv[1];
+		string mode = argv[1];
 
-		for (size_t i = 0; i < testMode.size(); i++)
-			testMode[i] = tolower(testMode[i]);
+		for (size_t i = 0; i < mode.size(); i++)
+			mode[i] = tolower(mode[i]);
 
-		if (testMode == "test")
+		if (mode == "-test")
 		{
 			cout << "Running Tests for Receiver" << endl;
 			RunPhysicalLayerTests();
 			return 0;
 		}
+		else if (mode == "-crc")
+			ReceiveCRCMessage();
+		else if (mode == "-hamming")
+			ReceiveHammingMessage();
+		else
+			cout << "Invalid Mode of Operation" << endl;
 	}
-	// normal transmitter function
 	else
-	{
-		ReceiveMessages();
-	}
+		cout << "Please Indicate a Mode of Operation" << endl;
+
 	return 0;
 }

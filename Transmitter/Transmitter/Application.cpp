@@ -74,7 +74,6 @@ void PrintList(list<bitset<8>> l)
 {
 	for (list<bitset<8>>::iterator it = l.begin(); it != l.end(); it++)
 		cout << *it << ' ';
-	cout << endl;
 }
 /////////////////////
 ////Auxiliary method for printing list
@@ -105,11 +104,11 @@ void PrintList(list<CRCFrame> l)
 {
 	for (list<CRCFrame>::iterator it = l.begin(); it != l.end(); it++)
 	{
-		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
+		cout << it->synChar1 << ' ' << it->synChar2 << ' ' << it->controlChar << ' ';
 		PrintList(it->data);
 		cout << ' ';
-		for (std::list<bool>::iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); ++i)
-			std::cout << *i;
+		for (list<bool>::iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); i++)
+			cout << *i;
 	}
 	cout << endl;
 }
@@ -142,6 +141,24 @@ string FrameToString(HammingFrame frame)
 		dataString.append(it->to_string());
 
 	frameString.append(dataString);
+
+	return frameString;
+}
+
+string FrameToString(CRCFrame frame)
+{
+	string frameString = frame.synChar1.to_string() + frame.synChar2.to_string() +
+		frame.controlChar.to_string();
+
+	string dataString = "";
+
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+		dataString.append(it->to_string());
+
+	frameString.append(dataString);
+
+	for (list<bool>::iterator it = frame.CRCCode.begin(); it != frame.CRCCode.end(); it++)
+		frameString.append(to_string(*it));
 
 	return frameString;
 }

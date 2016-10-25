@@ -45,6 +45,9 @@ int main(int argc, char* argv[])
 			if (argv[2] != nullptr)
 			{
 				string errorMode = argv[2];
+				for (size_t i = 0; i < errorMode.size(); i++)
+					errorMode[i] = tolower(errorMode[i]);
+
 				if (errorMode == "-errornum")
 					if (argv[3] != nullptr)
 						numOfErrors = atoi(argv[3]);
@@ -59,6 +62,7 @@ int main(int argc, char* argv[])
 			binaryData = ConvertTextForTransmission(infoFromFile);
 			cout << "----------Binary Representation of each Character----------" << endl;
 			PrintList(binaryData);
+			cout << endl;
 
 			if (mode == "-crc")
 			{
@@ -71,7 +75,7 @@ int main(int argc, char* argv[])
 				PrintList(CRCFrames);
 
 				//Reverse characters
-				//TransmitMessages(message, mode, numOfErrors);
+				TransmitFrames(CRCFrames, numOfErrors);
 			}
 			else if (mode == "-hamming")
 			{
@@ -86,6 +90,8 @@ int main(int argc, char* argv[])
 				//Reverse characters
 				TransmitFrames(HammingFrames, numOfErrors);
 			}
+			else
+				cout << "Invalid Mode of Operation" << endl;
 		}
 	}
 	else

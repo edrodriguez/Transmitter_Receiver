@@ -151,6 +151,7 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 					cout << "--------------------Accepted Message-------------------" << endl;
 				else
 				{
+					retryCount++;
 					cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
 					cout << "----------------Retransmitting Message-----------------" << endl;
 					realFrame = FrameToString(*dataIt);
@@ -167,6 +168,120 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 		cout << "Sending " << frames.size() << " Frames: " << endl;
 
 		for (list<HammingFrame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
+		{
+			string  frame;
+
+			frame = FrameToString(*dataIt);
+			frame.copy(transmittedMessage, frame.length(), 0);
+			transmittedMessage[frame.length()] = NULL;
+			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+
+			int retryCount = 0;
+			do
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+
+				if (accepted[0] == 1)
+					cout << "----------------------Accepted Message---------------------" << endl;
+				else
+				{
+					retryCount++;
+					cout << "----Message Contained Errors and Could Not Be Corrected----" << endl;
+					cout << "------------------Retransmitting Message-------------------" << endl;
+					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+				}
+			} while (accepted[0] == 0 && retryCount < 5);
+		}
+	}
+	send(Connection, finalMessage, sizeof(finalMessage), NULL);
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Starts the client connection and transmits all the
+//				messages composed of binary characters
+//
+//	Arguments:	[in]list<string>: list containing all the messages
+//
+////////////////////////////////////////////////////////////////
+void TransmitFrames(list<CRCFrame> frames, int numOfErrors)				/////////CRC overload
+{
+	list<transmissionError> errorsIntroduced;
+	list<CRCFrame> framesWithErrors;
+	char transmittedMessage[553];
+	char accepted[1] = { '0' };
+	char finalMessage[553] = "Done";
+
+	//Connect Socket
+	WSAData wsaData;
+	int sizeOfAddr;
+	WORD DllVersion = MAKEWORD(2, 1);
+
+	if (WSAStartup(DllVersion, &wsaData) != 0)
+	{
+		MessageBoxA(NULL, "Winsock startup failed", "Error", MB_OK | MB_ICONERROR);
+		exit(1);
+	}
+
+	SOCKADDR_IN address;
+	sizeOfAddr = sizeof(address);
+	address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	address.sin_port = htons(1111);
+	address.sin_family = AF_INET;
+	SOCKET Connection = socket(AF_INET, SOCK_STREAM, NULL);
+
+	if (connect(Connection, (SOCKADDR*)&address, sizeOfAddr) != 0)
+	{
+		MessageBoxA(NULL, "Failed to Connect", "Error", MB_OK | MB_ICONERROR);
+		return;
+	}
+	//Connected
+	cout << "Connected!" << endl;
+
+	//Generate and send messages with errors
+	if (numOfErrors > 0)
+	{
+		errorsIntroduced = GenerateTransmissionError(frames, framesWithErrors, numOfErrors);
+		PrintList(errorsIntroduced);
+		PrintList(framesWithErrors);
+
+		cout << "Sending " << framesWithErrors.size() << " Frames: " << endl;
+
+		for (list<CRCFrame>::iterator dataIt = frames.begin(), errorIt = framesWithErrors.begin();
+			dataIt != frames.end() && errorIt != framesWithErrors.end(); dataIt++, errorIt++)
+		{
+			string errorFrame, realFrame;
+
+			errorFrame = FrameToString(*errorIt);
+			errorFrame.copy(transmittedMessage, errorFrame.length(), 0);
+			transmittedMessage[errorFrame.length()] = NULL;
+			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+
+			int retryCount = 0;
+			do
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+
+				if (accepted[0] == 1)
+					cout << "--------------------Accepted Message-------------------" << endl;
+				else
+				{
+					retryCount++;
+					cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
+					cout << "----------------Retransmitting Message-----------------" << endl;
+					realFrame = FrameToString(*dataIt);
+					realFrame.copy(transmittedMessage, realFrame.length(), 0);
+					transmittedMessage[realFrame.length()] = NULL;
+					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
+				}
+			} while (accepted[0] == 0 && retryCount < 5);
+		}
+	}
+	//Send only messages without errors
+	else
+	{
+		cout << "Sending " << frames.size() << " Frames: " << endl;
+
+		for (list<CRCFrame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
 		{
 			string  frame;
 
@@ -228,30 +343,30 @@ list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, lis
 		if (charLocation == 0)
 		{
 			//Randomly generate a bit number
-			bitLocation = abs(int(rd())) % 12;
+			bitLocation = abs(int(rd())) % frameIt->synChar1.size();
 			frameIt->synChar1.flip(bitLocation);
 		}
 		//Change in Syn Char
 		else if (charLocation == 1)
 		{
 			//Randomly generate a bit number
-			bitLocation = abs(int(rd())) % 12;
+			bitLocation = abs(int(rd())) % frameIt->synChar2.size();
 			frameIt->synChar2.flip(bitLocation);
 		}
 		//Change in Control Char
 		else if (charLocation == 2)
 		{
 			//Randomly generate a bit number
-			bitLocation = abs(int(rd())) % 12;
+			bitLocation = abs(int(rd())) % frameIt->controlChar.size();
 			frameIt->controlChar.flip(bitLocation);
 		}
 		//Change in frame data
 		else
 		{
 			//Randomly generate a bit number
-			bitLocation = abs(int(rd())) % 12;
-			list<bitset<12>>::iterator byteIt = next(frameIt->data.begin(), charLocation);
-			byteIt->flip(bitLocation);
+			list<bitset<12>>::iterator bitIt = next(frameIt->data.begin(), charLocation);
+			bitLocation = abs(int(rd())) % bitIt->size();
+			bitIt->flip(bitLocation);
 		}
 
 		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
@@ -264,11 +379,81 @@ list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, lis
 	return errors;
 }
 
+//////////////////////////////crc overload
+list<transmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors, int numberOfBitsToChange)
+{
+	list<transmissionError> errors;
+
+	//Copy the data into data with error
+	CopyDataForErrorGeneration(frames, framesWithErrors);
+
+	for (int i = 0; i < numberOfBitsToChange; i++)
+	{
+		int frameLocation, charLocation, bitLocation;
+		transmissionError error;
+		random_device rd;
+
+		//Randomly generate a frame number
+		frameLocation = abs(int(rd())) % framesWithErrors.size();
+		list<CRCFrame>::iterator frameIt = next(framesWithErrors.begin(), frameLocation);
+
+		//Randomly generate a character number
+		charLocation = abs(int(rd())) % ((frameIt->data).size() + 3);
+
+		//Change in Syn Char
+		if (charLocation == 0)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % frameIt->synChar1.size();
+			frameIt->synChar1.flip(bitLocation);
+		}
+		//Change in Syn Char
+		else if (charLocation == 1)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % frameIt->synChar2.size();
+			frameIt->synChar2.flip(bitLocation);
+		}
+		//Change in Control Char
+		else if (charLocation == 2)
+		{
+			//Randomly generate a bit number
+			bitLocation = abs(int(rd())) % frameIt->controlChar.size();
+			frameIt->controlChar.flip(bitLocation);
+		}
+		//Change in frame data
+		else
+		{
+			//Randomly generate a bit number
+			list<bitset<8>>::iterator bitIt = next(frameIt->data.begin(), charLocation);
+			bitLocation = abs(int(rd())) % bitIt->size();
+			bitIt->flip(bitLocation);
+		}
+
+		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
+		error.byteLocation = charLocation + 1;
+		error.bitLocation = bitLocation + 1;
+
+		errors.push_back(error);
+	}
+
+	return errors;
+}
+
+////////////////hamming
 void CopyDataForErrorGeneration(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors)		//hamming overload
 {
 	for (list<HammingFrame>::iterator it = frames.begin(); it != frames.end(); it++)
 		framesWithErrors.push_back(*it);
 }
+
+//////////crc
+void CopyDataForErrorGeneration(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors)
+{
+	for (list<CRCFrame>::iterator it = frames.begin(); it != frames.end(); it++)
+		framesWithErrors.push_back(*it);
+}
+
 
 list<bitset<12>> GenerateHammingForData(list<bitset<8>> data)
 {
@@ -420,9 +605,9 @@ void CalculateCRC(CRCFrame &frame)
 	list<bool> dividend;
 
 	//Get n-k digits as the dividend
-	while (D.size() > 0)
+	while (!D.empty())
 	{
-		while (dividend.size() < CRCANSI.size() && D.size() > 0)
+		while (dividend.size() < CRCANSI.size() && !D.empty())
 		{
 			dividend.push_back(*(D.begin()));
 			D.pop_front();

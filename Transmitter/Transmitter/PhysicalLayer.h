@@ -104,7 +104,13 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors);   /////////////////
 ////////////////////////////////////////////////////////////////     ///////////hamming overload
 list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int numberOfBitsToChange);
 
+//////////////////////////////crc overload
+list<transmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors, int numberOfBitsToChange);
+
 void CopyDataForErrorGeneration(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors);
+
+//////////crc
+void CopyDataForErrorGeneration(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors);
 
 list<bitset<12>> GenerateHammingForData(list<bitset<8>> data);
 

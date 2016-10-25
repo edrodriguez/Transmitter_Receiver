@@ -52,5 +52,8 @@ void PrintList(list<CRCFrame> l);
 ////Auxiliary method for printing list
 ////////////////////
 void PrintList(list<transmissionError> l);
-/////////////////////////////////////////////////////////
+/////hamming
 string FrameToString(HammingFrame frame);
+/////crc
+string FrameToString(CRCFrame frame);
+

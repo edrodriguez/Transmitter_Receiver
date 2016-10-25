@@ -19,11 +19,11 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////
 //	Description:Starts the server connection, receives the
-//				messages transmitted, calls methods for checking
+//				messages transmitted, calls methods for checking		/////////////////////////////fix
 //				the validity of the messages and printing out
 //				the messages to the console
 ////////////////////////////////////////////////////////////////
-void ReceiveMessages()
+void ReceiveHammingMessage()
 {
    //Startup
 	WSAData wsaData;
@@ -101,7 +101,7 @@ void ReceiveMessages()
 				list<bitset<12>> FrameWithHamming;
 				FrameWithHamming = ConvertToBitsets(messageString);
 
-				if (IsMessageValid(FrameWithHamming))
+				if (IsHammingValid(FrameWithHamming))
 				{
 
 					list<char> convertedMessage;
@@ -124,6 +124,116 @@ void ReceiveMessages()
 	}
 	cout << endl;
 }
+
+////////////////////////////////////////////////////////////////
+//	Description:Starts the server connection, receives the
+//				messages transmitted, calls methods for checking		/////////////////////////////fix
+//				the validity of the messages and printing out
+//				the messages to the console
+////////////////////////////////////////////////////////////////
+void ReceiveCRCMessage()
+{
+	//Startup
+	WSAData wsaData;
+	int		sizeOfAddr;
+	WORD DllVersion = MAKEWORD(2, 1);
+
+	if (WSAStartup(DllVersion, &wsaData) != 0)
+	{
+		MessageBoxA(NULL, "WinSock startup failed", "Error", MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	SOCKADDR_IN address;
+	sizeOfAddr = sizeof(address);
+	address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	address.sin_port = htons(1111);
+	address.sin_family = AF_INET;
+
+	SOCKET sListen = socket(AF_INET, SOCK_STREAM, NULL);
+	bind(sListen, (SOCKADDR*)&address, sizeof(address));
+	listen(sListen, SOMAXCONN);
+
+
+	SOCKET newConnection;
+	newConnection = accept(sListen, (SOCKADDR*)&address, &sizeOfAddr);
+
+	if (newConnection == 0)
+	{
+		cout << "Failed to accept the client's connection." << endl;
+	}
+	else
+	{
+		cout << "Client Connected!" << endl;
+		bool transmitting = true;
+		char accepted[1] = { 1 };
+		char rejected[1] = { 0 };
+
+		char M[553];
+		list<char> finalMessage = { 'D','o','n','e' };
+		list<char> message;
+
+		while (transmitting)
+		{
+			recv(newConnection, M, sizeof(M), NULL); //Receive Message
+
+													 //Check if done receiving
+			int matchCount = 0;
+			for (list<char>::iterator it = finalMessage.begin(); it != finalMessage.end(); it++)
+			{
+				if (*it == M[matchCount])
+					matchCount++;
+				else
+					break;
+
+				if (matchCount == 4) //received message is "Done"
+					transmitting = false;
+			}
+
+			if (transmitting)
+			{
+				//store incoming message in a list of characters
+				for (int i = 0; i < sizeof(M); i++)
+				{
+					if (M[i] == NULL)
+						break;
+					else
+						message.push_back(M[i]);
+				}
+				//convert message into a string
+				string messageString;
+				for (list<char>::iterator it = message.begin(); it != message.end(); it++)
+					messageString.append(1u, *it);
+
+				//convert the string into binary bitsets
+				list<bool> FrameWithCRC;
+				FrameWithCRC = ConvertToBoolList(messageString);
+
+				if (IsCRCValid(FrameWithCRC))
+				{
+
+					list<char> convertedMessage;
+					list<bitset<8>> deFramedData;
+					deFramedData = DeFrame(FrameWithCRC);
+					convertedMessage = ConvertBinaryMessage(deFramedData);
+
+					//print message
+					PrintList(convertedMessage);
+
+					//send confirmation
+					send(newConnection, accepted, sizeof(accepted), NULL);
+				}
+				else //send rejection
+					send(newConnection, rejected, sizeof(rejected), NULL);
+
+				message.clear();
+			}
+		}
+	}
+	cout << endl;
+}
+
+
 
 ////////////////////////////////////////////////////////////////
 //	Description:Separates a string of binary characters into
@@ -169,6 +279,27 @@ list<bitset<12>> ConvertToBitsets(string message)
 }
 
 ////////////////////////////////////////////////////////////////
+//	Description:Separates a string of binary characters into
+//				8 bit bitsets and inverts the data characters
+//				as they were transmitted with LSB first
+//
+//	Arguments:	[in]string: message
+//
+//	Return:		[out]list<bitset<8>>:list of bitsets representing
+//									 the message						//////////Include reversing
+////////////////////////////////////////////////////////////////
+list<bool> ConvertToBoolList(string message)
+{
+	list<bool> binaryCharacters;
+	const int ASCII_CONVERTER = 48;
+
+	for (size_t i = 0; i < message.size(); i++)
+		binaryCharacters.push_back(message[i] - ASCII_CONVERTER);
+
+	return binaryCharacters;
+}
+
+////////////////////////////////////////////////////////////////
 //	Description:Checks that the message had no transmission
 //				errors. This will be expanded in future milestones
 //
@@ -179,12 +310,74 @@ list<bitset<12>> ConvertToBitsets(string message)
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsMessageValid(list<bitset<12>> binaryCharacters)
+bool IsHammingValid(list<bitset<12>> binaryCharacters)
 {
 	for (list<bitset<12>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
 		if (!CheckHammingParity(*it))
 			return false;
 	return true;
+}
+//////////////////////////////////////////////
+bool IsCRCValid(list<bool> binaryCharacters)
+{
+	bitset<17> CRCANSI("11000000000000101");
+	list<bool> D = binaryCharacters;
+	list<bool> dividend;
+	bool correctMessage = true;
+
+	while (!D.empty())
+	{
+		while (dividend.size() < CRCANSI.size() && !D.empty())
+		{
+			dividend.push_back(*(D.begin()));
+			D.pop_front();
+		}
+
+		if (dividend.size() == CRCANSI.size())
+		{
+			//Perform XOR Operation
+			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
+		}
+		else
+		{
+			//Erase leading 0s
+			while (!dividend.empty() && *(dividend.begin()) != 1)
+				dividend.pop_front();
+
+			if (!dividend.empty())
+				return false;
+		}
+	}
+
+	return true;
+}
+
+list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2)
+{
+	bitset<17> b1;
+	bitset<17> result;
+	list<bool> outResult;
+
+	int index = b1.size() - 1;
+	for (list<bool>::iterator it = l.begin(); it != l.end(); it++)
+	{
+		b1[index] = *it;
+		index--;
+	}
+
+	//XOR
+	result = b1^b2;
+
+	for (size_t i = 0; i < result.size(); i++)
+	{
+		outResult.push_front(result[i]);
+	}
+
+	//Erase leading 0s
+	while (!outResult.empty() && *(outResult.begin()) != 1)
+		outResult.pop_front();
+
+	return outResult;
 }
 
 
