@@ -20,5 +20,8 @@ void CalculateHammingCode_Input00000000_Return000000000000();
 
 void CalculateHammingCode_Input10010001_Return001000110001();
 
+void CalculateCRC_Input0000000_Return0000001111000000();
+
+
 void CalculateHammingCode_Input11111111_Return111011101111();
 

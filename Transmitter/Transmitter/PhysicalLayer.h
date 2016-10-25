@@ -21,7 +21,7 @@ struct CRCFrame
 	bitset<8> synChar2;
 	bitset<8> controlChar;
 	list<bitset<8>> data;
-	vector<bool> CRCCode;
+	list<bool> CRCCode;
 };
 
 struct HammingFrame
@@ -111,3 +111,5 @@ list<bitset<12>> GenerateHammingForData(list<bitset<8>> data);
 bitset<12> CalculateHammingCode(bitset<8> byteOfData);
 
 void CalculateCRC(CRCFrame &frame);
+
+list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2);

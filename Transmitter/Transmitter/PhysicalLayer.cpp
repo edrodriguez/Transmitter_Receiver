@@ -389,5 +389,90 @@ bitset<12> CalculateHammingCode(bitset<8> byteOfData)
 void CalculateCRC(CRCFrame &frame)
 {
 	bitset<17> CRCANSI("11000000000000101");
-	int sizeOfCRCCode = frame.data.size() + 3;
+	size_t remainderSize = CRCANSI.size() - 1;
+	list<bool> D;
+	list<bool> CRC;
+
+	//Copy data from the frame into D
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	{
+		for (size_t i = 0; i < it->size(); i++)
+		{
+			D.push_front((*it)[i]);
+		}
+	}
+
+	for (size_t i = 0; i < frame.controlChar.size(); i++)
+		D.push_front(frame.controlChar[i]);
+
+	for (size_t i = 0; i < frame.synChar2.size(); i++)
+		D.push_front(frame.synChar2[i]);
+	
+	for (size_t i = 0; i < frame.synChar1.size(); i++)
+		D.push_front(frame.synChar1[i]);
+
+
+	//Multiply D by 2^(n-k)
+	for (size_t i = 0; i < remainderSize; i++)
+		D.push_back(0);
+
+	//Perform long division
+	list<bool> dividend;
+
+	//Get n-k digits as the dividend
+	while (D.size() > 0)
+	{
+		while (dividend.size() < CRCANSI.size() && D.size() > 0)
+		{
+			dividend.push_back(*(D.begin()));
+			D.pop_front();
+		}
+
+		if (dividend.size() == CRCANSI.size())
+		{
+			//Perform XOR Operation
+			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
+		}
+		else
+		{
+			for (list<bool>::iterator it = dividend.begin(); it != dividend.end(); it++)
+				CRC.push_back(*it);  ///cHECK PUSHING
+
+			//Add leading 0s to match n-k size
+			while (CRC.size() < remainderSize)
+				CRC.push_front(0);  ///CHECK PUSHING
+		}
+	}
+
+	frame.CRCCode = CRC;
+
 }
+
+list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2)
+{
+	bitset<17> b1;
+	bitset<17> result;
+	list<bool> outResult;
+
+	int index = b1.size() - 1;
+	for (list<bool>::iterator it = l.begin(); it != l.end(); it++)
+	{
+		b1[index] = *it;
+		index--;
+	}
+
+	//XOR
+	result = b1^b2;
+
+	for (size_t i = 0; i < result.size(); i++)
+	{
+		outResult.push_front(result[i]);
+	}
+
+	//Erase leading 0s
+	while (!outResult.empty() && *(outResult.begin()) != 1)
+		outResult.pop_front();
+
+	return outResult;
+}
+

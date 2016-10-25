@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 				FrameMessage(binaryData, CRCFrames);
 
 				cout << "---------------------Frames With CRC---------------------" << endl;
-				//PrintList(CRCFrames);
+				PrintList(CRCFrames);
 
 				//Reverse characters
 				//TransmitMessages(message, mode, numOfErrors);

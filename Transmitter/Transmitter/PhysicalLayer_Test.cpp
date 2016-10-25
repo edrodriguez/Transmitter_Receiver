@@ -15,7 +15,7 @@ void RunPhysicalLayerTests()
 	CalculateHammingCode_Input00000000_Return000000000000();
 	CalculateHammingCode_Input10010001_Return001000110001();
 	CalculateHammingCode_Input11111111_Return111011101111();
-
+	CalculateCRC_Input0000000_Return0000001111000000();
 }
 
 //void ConvertToBinary_InputA_Returns1000001()
@@ -156,4 +156,19 @@ void CalculateHammingCode_Input11111111_Return111011101111()
 		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 PASSED" << endl;
 	else
 		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 FAILED" << endl;
+}
+
+void CalculateCRC_Input0000000_Return0000001111000000()
+{
+	CRCFrame input;
+	//input.synChar1[0] = 1;
+	input.data.push_back(bitset<8>("10100000"));
+	list<bool> expectedOutput{ 0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0 };
+
+	CalculateCRC(input);
+
+	if (input.CRCCode == expectedOutput)
+		std::cout << "Test CalculateCRC_Input0000000_Return0000001111000000 PASSED" << endl;
+	else
+		std::cout << "Test CalculateCRC_Input0000000_Return0000001111000000 FAILED" << endl;
 }

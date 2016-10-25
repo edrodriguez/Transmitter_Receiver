@@ -101,14 +101,14 @@ void PrintList(list<HammingFrame> l)
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<CRCFrame> l, int numOfErrors = 0)
+void PrintList(list<CRCFrame> l)
 {
 	for (list<CRCFrame>::iterator it = l.begin(); it != l.end(); it++)
 	{
 		cout << it->synChar1 << it->synChar2 << it->controlChar << ' ';
 		PrintList(it->data);
 		cout << ' ';
-		for (std::vector<bool>::const_iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); ++i)
+		for (std::list<bool>::iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); ++i)
 			std::cout << *i;
 	}
 	cout << endl;
