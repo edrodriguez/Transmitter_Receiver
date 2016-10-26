@@ -11,6 +11,12 @@
 
 using namespace std;
 
+struct HammingErrorDetection
+{
+	bool isHammingCorrect;
+	int errorBit;
+};
+
 ////////////////////////////////////////////////////////////////
 //	Description:Starts the server connection, receives the
 //				messages transmitted, calls methods for checking
@@ -56,7 +62,7 @@ list<bool> ConvertToBoolList(string message);
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsHammingValid(list<bitset<12>> binaryCharacters);
+bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the message had no transmission
@@ -84,7 +90,7 @@ list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2);
 //						  correct parity bit
 //	Ret Value:	true if correct parity, false if incorrect
 ////////////////////////////////////////////////////////////////
-bool CheckHammingParity(bitset<12> binaryChar);
+HammingErrorDetection CheckHammingParity(bitset<12> binaryChar);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Converts a list of bitsets into a list of

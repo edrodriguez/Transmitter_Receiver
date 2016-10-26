@@ -64,10 +64,12 @@ void ReceiveHammingMessage()
 		char M[805];
 		list<char> finalMessage = { 'D','o','n','e' };
 		list<char> message;
+		int framesReceived = 0;
 
 		while (transmitting)
 		{
 			recv(newConnection, M, sizeof(M), NULL); //Receive Message
+			framesReceived++;
 
 			//Check if done receiving
 			int matchCount = 0;
@@ -101,7 +103,7 @@ void ReceiveHammingMessage()
 				list<bitset<12>> FrameWithHamming;
 				FrameWithHamming = ConvertToBitsets(messageString);
 
-				if (IsHammingValid(FrameWithHamming))
+				if (IsHammingValid(FrameWithHamming, framesReceived))
 				{
 
 					list<char> convertedMessage;
@@ -310,11 +312,36 @@ list<bool> ConvertToBoolList(string message)
 //						  or not
 //	Ret Value:	true if valid message, false if invalid
 ////////////////////////////////////////////////////////////////
-bool IsHammingValid(list<bitset<12>> binaryCharacters)
+bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived)
 {
+	int charLocation = 1;
+
 	for (list<bitset<12>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-		if (!CheckHammingParity(*it))
-			return false;
+	{
+		HammingErrorDetection hammingCheckResults;
+
+		hammingCheckResults = CheckHammingParity(*it);
+
+		if (!hammingCheckResults.isHammingCorrect)
+		{
+			cout << "---Received Message Contained Error, Atempting to Fix Character---" << endl;
+			cout << "*Location of Error:" << endl;
+			cout << "\t-Frame: " << framesReceived << endl;;
+			cout << "\t-Character: " << charLocation << endl;;
+			cout << "\t-Bit: " << (it->size() - hammingCheckResults.errorBit + 1) << endl;;
+			//Attempt to fix code
+			it->flip(it->size() - hammingCheckResults.errorBit);
+			hammingCheckResults = CheckHammingParity(*it);
+			if (!hammingCheckResults.isHammingCorrect)
+			{
+				cout << "----------Character Couldn't be Fixed, Requesting Resend---------" << endl;
+				return false;
+			}
+			else
+				cout << "-------------------------Fixed Character-------------------------" << endl;
+		}
+		charLocation++;
+	}
 	return true;
 }
 //////////////////////////////////////////////
@@ -338,16 +365,14 @@ bool IsCRCValid(list<bool> binaryCharacters)
 			//Perform XOR Operation
 			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
 		}
-		else
-		{
-			//Erase leading 0s
-			while (!dividend.empty() && *(dividend.begin()) != 1)
-				dividend.pop_front();
-
-			if (!dividend.empty())
-				return false;
-		}
 	}
+
+	//Erase leading 0s
+	while (!dividend.empty() && *(dividend.begin()) != 1)
+		dividend.pop_front();
+
+	if (!dividend.empty())
+		return false;
 
 	return true;
 }
@@ -391,11 +416,14 @@ list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2)
 //						  correct parity bit
 //	Ret Value:	true if correct parity, false if incorrect
 ////////////////////////////////////////////////////////////////
-bool CheckHammingParity(bitset<12> binaryChar)
+HammingErrorDetection CheckHammingParity(bitset<12> binaryChar)
 {
 	int parityCount = 0;
 	int parityBitLocation = 0;
 	int checkIndex = 0;
+	HammingErrorDetection error;
+	error.errorBit = 0;
+	error.isHammingCorrect = true;
 
 	//Check parity bit 1 (p1)
 	parityBitLocation = binaryChar.size() - 1;
@@ -407,7 +435,7 @@ bool CheckHammingParity(bitset<12> binaryChar)
 		checkIndex -= 2;
 	} while (checkIndex >= 0);
 	if (parityCount % 2 == 1) //odd parity
-		return false;
+		error.errorBit += 1;
 
 	//Calculate parity bit 2 (p2)
 	parityCount = 0;
@@ -422,7 +450,7 @@ bool CheckHammingParity(bitset<12> binaryChar)
 		checkIndex -= 4;
 	} while (checkIndex >= 0);
 	if (parityCount % 2 == 1) //odd parity
-		return false;
+		error.errorBit += 2;
 
 	//Calculate parity bit 4 (p4)
 	parityCount = 0;
@@ -444,7 +472,7 @@ bool CheckHammingParity(bitset<12> binaryChar)
 		checkIndex -= 8;
 	} while (checkIndex >= 0);
 	if (parityCount % 2 == 1) //odd parity
-		return false;
+		error.errorBit += 4;
 
 	//Calculate parity bit 8 (p8)
 	parityCount = 0;
@@ -478,9 +506,17 @@ bool CheckHammingParity(bitset<12> binaryChar)
 		checkIndex -= 16;
 	} while (checkIndex >= 0);
 	if (parityCount % 2 == 1) //odd parity
-		return false;
+		error.errorBit += 8;
 
-	return true;
+	//If there is an error bit, the code is wrong
+	if (error.errorBit != 0)
+	{
+		error.isHammingCorrect = false;
+	}
+	else
+		error.isHammingCorrect = true;
+
+	return error;
 }
 
 ////////////////////////////////////////////////////////////////

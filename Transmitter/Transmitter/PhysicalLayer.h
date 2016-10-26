@@ -41,7 +41,7 @@ struct Message
 struct transmissionError
 {
 	int frameLocation;
-	int byteLocation;
+	int charLocation;
 	int bitLocation;
 	Message messageWithErrors;
 };

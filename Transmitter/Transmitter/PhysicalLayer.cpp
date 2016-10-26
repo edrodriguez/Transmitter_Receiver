@@ -313,7 +313,7 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors)				/////////CRC over
 ////////////////////////////////////////////////////////////////
 //	Description:Changes the number of bits indicated
 //				in the input parameter in a random position in
-//				the message
+//				the message												/////do not generate two errors in the same char
 //
 //	Arguments:	[in]int (optional): Number of bits to change.			/////hamming overload
 //									Default value: 0.
@@ -322,6 +322,8 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors)				/////////CRC over
 list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int numberOfBitsToChange)
 {
 	list<transmissionError> errors;
+	list<int> errorFrames;
+	list<int> errorChars;
 
 	//Copy the data into data with error
 	CopyDataForErrorGeneration(frames, framesWithErrors);
@@ -333,6 +335,14 @@ list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, lis
 		random_device rd;
 
 		//Randomly generate a frame number
+		//if (errorFrames.size() < framesWithErrors.size())
+		//{
+		//	frameLocation = abs(int(rd())) % framesWithErrors.size();
+		//	for (list<int>::iterator it = errorFrames.begin(); it != errorFrames.end(); it++)
+		//	{
+		//		if (frameLocation == *it)
+		//	}
+		//}
 		frameLocation = abs(int(rd())) % framesWithErrors.size();
 		list<HammingFrame>::iterator frameIt = next(framesWithErrors.begin(), frameLocation);
 
@@ -364,13 +374,13 @@ list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, lis
 		else
 		{
 			//Randomly generate a bit number
-			list<bitset<12>>::iterator bitIt = next(frameIt->data.begin(), charLocation);
+			list<bitset<12>>::iterator bitIt = next(frameIt->data.begin(), charLocation - 3);
 			bitLocation = abs(int(rd())) % bitIt->size();
 			bitIt->flip(bitLocation);
 		}
 
 		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
-		error.byteLocation = charLocation + 1;
+		error.charLocation = charLocation + 1;
 		error.bitLocation = bitLocation + 1;
 
 		errors.push_back(error);
@@ -425,13 +435,13 @@ list<transmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CR
 		else
 		{
 			//Randomly generate a bit number
-			list<bitset<8>>::iterator bitIt = next(frameIt->data.begin(), charLocation);
+			list<bitset<8>>::iterator bitIt = next(frameIt->data.begin(), charLocation - 3);
 			bitLocation = abs(int(rd())) % bitIt->size();
 			bitIt->flip(bitLocation);
 		}
 
 		error.frameLocation = frameLocation + 1; /////////////everything is 1 indexed
-		error.byteLocation = charLocation + 1;
+		error.charLocation = charLocation + 1;
 		error.bitLocation = bitLocation + 1;
 
 		errors.push_back(error);
@@ -618,16 +628,14 @@ void CalculateCRC(CRCFrame &frame)
 			//Perform XOR Operation
 			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
 		}
-		else
-		{
-			for (list<bool>::iterator it = dividend.begin(); it != dividend.end(); it++)
-				CRC.push_back(*it);  ///cHECK PUSHING
-
-			//Add leading 0s to match n-k size
-			while (CRC.size() < remainderSize)
-				CRC.push_front(0);  ///CHECK PUSHING
-		}
 	}
+
+	for (list<bool>::iterator it = dividend.begin(); it != dividend.end(); it++)
+		CRC.push_back(*it);  ///cHECK PUSHING
+
+							 //Add leading 0s to match n-k size
+	while (CRC.size() < remainderSize)
+		CRC.push_front(0);  ///CHECK PUSHING
 
 	frame.CRCCode = CRC;
 

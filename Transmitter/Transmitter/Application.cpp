@@ -121,9 +121,9 @@ void PrintList(list<transmissionError> l)
 
 	for (list<transmissionError>::iterator it = l.begin(); it != l.end(); it++)
 	{
-		cout << "*Error:" << endl;
+		cout << "*Location of Error:" << endl;
 		cout << "\t-Frame: " << it->frameLocation << endl;;
-		cout << "\t-Character: " << it->byteLocation << endl;;
+		cout << "\t-Character: " << it->charLocation << endl;;
 		cout << "\t-Bit: " << it->bitLocation << endl;;
 	}
 	cout << endl;
