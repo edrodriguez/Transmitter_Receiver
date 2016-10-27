@@ -6,6 +6,7 @@
 //				and transmitting the message
 ////////////////////////////////////////////////////////////////
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib")
 #include "PhysicalLayer.h"
 #include "Application.h"
@@ -74,7 +75,7 @@ void CalculateCRC(CRCFrame &frame)
 {
 	//Initialize CRC as 0s
 	array<bool, 16> CRC;
-	for (int i = 0; i< CRC.size(); ++i)
+	for (size_t i = 0; i< CRC.size(); ++i)
 		CRC[i] = 0;
 
 	//Copy data from the frame into D
@@ -129,7 +130,7 @@ void CalculateCRC(CRCFrame &frame)
 	}
 
 	list<bool> outResult;
-	for (int i = 0; i < CRC.size(); i++)
+	for (size_t i = 0; i < CRC.size(); i++)
 		outResult.push_front(CRC[i]);
 
 	frame.CRCCode = outResult;
@@ -661,7 +662,7 @@ list<TransmissionError> GenerateTransmissionError(list<HammingFrame> frames,
 		list<int> charsUsed;
 		bool positionFound  = false;
 		int frameLocation = distance(framesWithErrors.begin(), frameIt);
-		int changePerFrame = *numberOfBitsToChange;
+		size_t changePerFrame = *numberOfBitsToChange;
 		
 		if (changePerFrame > frameIt->data.size() + 3)
 		{
@@ -672,7 +673,7 @@ list<TransmissionError> GenerateTransmissionError(list<HammingFrame> frames,
 
 		totalNumOfErrors += changePerFrame;
 
-		for (int i = 0; i < changePerFrame; i++)
+		for (size_t i = 0; i < changePerFrame; i++)
 		{
 			positionFound = false;
 			while (!positionFound)

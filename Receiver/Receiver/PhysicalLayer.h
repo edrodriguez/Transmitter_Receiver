@@ -11,88 +11,22 @@
 
 using namespace std;
 
+/**************************************************************/
+/***********************Structs for Data***********************/
+/**************************************************************/
 struct HammingErrorDetection
 {
 	bool isHammingCorrect;
 	int errorBit;
 };
 
-////////////////////////////////////////////////////////////////
-//	Description:Starts the server connection, receives the
-//				messages transmitted, calls methods for checking
-//				the validity of the messages and printing out
-//				the messages to the console
-////////////////////////////////////////////////////////////////
-
-
-void ReceiveHammingMessage();
-
-void ReceiveCRCMessage();
-
-////////////////////////////////////////////////////////////////
-//	Description:Separates a string of binary characters into
-//				8 bit bitsets
-//
-//	Arguments:	[in]string: message
-//
-//	Return:		[out]list<bitset<8>>:list of bitsets representing				///////////
-//									 the message
-////////////////////////////////////////////////////////////////
-list<bitset<12>> ConvertToBitsets(string message);
-
-////////////////////////////////////////////////////////////////
-//	Description:Separates a string of binary characters into
-//				8 bit bitsets
-//
-//	Arguments:	[in]string: message
-//
-//	Return:		[out]list<bitset<8>>:list of bitsets representing				///////////
-//									 the message
-////////////////////////////////////////////////////////////////
-list<bool> ConvertToBoolList(string message);
-
-////////////////////////////////////////////////////////////////
-//	Description:Checks that the message had no transmission
-//				errors. This will be expanded in future milestones
-//
-//	Arguments:	[in]list<bitset<8>>:list of bitsets representing
-//									 the message
-//
-//	Return:		[out]bool:indicates if the message is valid
-//						  or not
-//	Ret Value:	true if valid message, false if invalid
-////////////////////////////////////////////////////////////////
-bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived);
-
-////////////////////////////////////////////////////////////////
-//	Description:Checks that the message had no transmission
-//				errors. This will be expanded in future milestones
-//
-//	Arguments:	[in]list<bitset<8>>:list of bitsets representing
-//									 the message
-//
-//	Return:		[out]bool:indicates if the message is valid
-//						  or not
-//	Ret Value:	true if valid message, false if invalid
-////////////////////////////////////////////////////////////////
-bool IsCRCValid(list<bool> binaryCharacters);
-
-////////////////////////////////////////////////////////////////
-//	Description:Checks that the parity bit of the input bitset
-//				is correct
-//
-//	Arguments:	[in]bitset<8>:binary bitset with a parity bit
-//
-//	Return:		[out]bool:indicates if the bitset has the 
-//						  correct parity bit
-//	Ret Value:	true if correct parity, false if incorrect
-////////////////////////////////////////////////////////////////
-HammingErrorDetection CheckHammingParity(bitset<12> binaryChar);
+/**************************************************************/
+/****************************Common****************************/
+/**************************************************************/
 
 ////////////////////////////////////////////////////////////////
 //	Description:Converts a list of bitsets into a list of
-//				characters. It calls ConvertBinaryToChar for
-//				the conversion of each specific bitset
+//				characters.
 //
 //	Arguments:	[in]list<bitset<8>>:list of all the bitsets
 //									 to be converted
@@ -102,11 +36,88 @@ HammingErrorDetection CheckHammingParity(bitset<12> binaryChar);
 ////////////////////////////////////////////////////////////////
 list<char> ConvertBinaryMessage(list< bitset<8>> binaryCharacters);
 
+/**************************************************************/
+/*****************************CRC******************************/
+/**************************************************************/
+
 ////////////////////////////////////////////////////////////////
-//	Description:Converts a bitset into a character
-//
-//	Arguments:	[in]bitset<8>:binary char
-//
-//	Return:		[out]char: character obtained from the binary
+//	Description:Starts the server connection, receives the
+//				messages transmitted, calls methods for checking
+//				the validity of the messages and printing out
+//				the messages to the console
 ////////////////////////////////////////////////////////////////
-char ConvertBinaryToChar(bitset<8> binaryChar);
+void ReceiveCRCMessage();
+
+////////////////////////////////////////////////////////////////
+//	Description:Converts a string into a list of bools
+//
+//	Arguments:	[in]string: frame
+//
+//	Return:		[out]list<bool>:list of bools representing
+//									 the frame					
+////////////////////////////////////////////////////////////////
+list<bool> ConvertToBoolList(string message);
+
+////////////////////////////////////////////////////////////////
+//	Description:Checks that the message had no transmission
+//				errors.
+//
+//	Arguments:	[in]list<bool>:list of bitsets representing
+//							   the frame
+//
+//	Return:		[out]bool:indicates if the message is valid
+//						  or not
+//	Ret Value:	true if valid message, false if invalid
+////////////////////////////////////////////////////////////////
+bool IsCRCValid(list<bool> binaryCharacters);
+
+/**************************************************************/
+/***************************Hamming****************************/
+/**************************************************************/
+
+////////////////////////////////////////////////////////////////
+//	Description:Starts the server connection, receives the
+//				messages transmitted, calls methods for checking
+//				the validity of the messages and printing out
+//				the messages to the console
+////////////////////////////////////////////////////////////////
+void ReceiveHammingMessage();
+
+////////////////////////////////////////////////////////////////
+//	Description:Separates a string of binary characters into
+//				12 bit bitsets
+//
+//	Arguments:	[in]string: message
+//
+//	Return:		[out]list<bitset<12>>:list of bitsets representing
+//									 the received frame
+////////////////////////////////////////////////////////////////
+list<bitset<12>> ConvertToBitsets(string frame);
+
+////////////////////////////////////////////////////////////////
+//	Description:Checks that the message had no transmission
+//				errors. If there are errors, it attempts to
+//				correct them.
+//
+//	Arguments:	[in]list<bitset<12>>&:list of bitsets representing
+//									 the frame
+//
+//	Return:		[out]bool:indicates if the message is valid
+//						  or not
+//	Ret Value:	true if valid message, false if invalid
+////////////////////////////////////////////////////////////////
+bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived);
+
+////////////////////////////////////////////////////////////////
+//	Description:Checks that the parity bit of the input bitset
+//				is correct. It also stores the location of the
+//				error bit
+//
+//	Arguments:	[in]bitset<12>:binary bitset with a parity bit
+//
+//	Return:		[out]HammingErrorDetection: bool indicating
+//					 whether the parity is correct for that
+//					 bitset and if it is incorrect it also
+//					 contains the location of the error bit
+////////////////////////////////////////////////////////////////
+HammingErrorDetection CheckHammingParity(bitset<12> binaryChar);

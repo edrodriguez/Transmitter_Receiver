@@ -18,10 +18,230 @@
 
 using namespace std;
 
+/**************************************************************/
+/****************************Common****************************/
+/**************************************************************/
+
+////////////////////////////////////////////////////////////////
+//	Description:Converts a list of bitsets into a list of
+//				characters.
+//
+//	Arguments:	[in]list<bitset<8>>:list of all the bitsets
+//									 to be converted
+//
+//	Return:		[out]list<char>:list of all the characters
+//								converted
+////////////////////////////////////////////////////////////////
+list<char> ConvertBinaryMessage(list<bitset<8>> binaryCharacters)
+{
+	list<char> convertedMessage;
+
+	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
+		convertedMessage.push_back(char(it->to_ulong()));
+
+	return convertedMessage;
+}
+
+/**************************************************************/
+/*****************************CRC******************************/
+/**************************************************************/
+
 ////////////////////////////////////////////////////////////////
 //	Description:Starts the server connection, receives the
-//				messages transmitted, calls methods for checking		/////////////////////////////fix
+//				messages transmitted, calls methods for checking
 //				the validity of the messages and printing out
+//				the messages to the console
+////////////////////////////////////////////////////////////////
+void ReceiveCRCMessage()
+{
+	//Startup
+	WSAData wsaData;
+	int		sizeOfAddr;
+	WORD DllVersion = MAKEWORD(2, 1);
+
+	if (WSAStartup(DllVersion, &wsaData) != 0)
+	{
+		MessageBoxA(NULL, "WinSock startup failed", "Error", MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	SOCKADDR_IN address;
+	sizeOfAddr = sizeof(address);
+	address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	address.sin_port = htons(1111);
+	address.sin_family = AF_INET;
+
+	SOCKET sListen = socket(AF_INET, SOCK_STREAM, NULL);
+	bind(sListen, (SOCKADDR*)&address, sizeof(address));
+	listen(sListen, SOMAXCONN);
+
+
+	SOCKET newConnection;
+	newConnection = accept(sListen, (SOCKADDR*)&address, &sizeOfAddr);
+
+	if (newConnection == 0)
+	{
+		cout << "Failed to accept the client's connection." << endl;
+	}
+	else
+	{
+		cout << "Client Connected!" << endl;
+		bool transmitting = true;
+		char accepted[1] = { 1 };
+		char rejected[1] = { 0 };
+
+		char M[553];
+		list<char> finalMessage = { 'D','o','n','e' };
+		list<char> message;
+
+		while (transmitting)
+		{
+			recv(newConnection, M, sizeof(M), NULL); //Receive Message
+
+													 //Check if done receiving
+			int matchCount = 0;
+			for (list<char>::iterator it = finalMessage.begin(); it != finalMessage.end(); it++)
+			{
+				if (*it == M[matchCount])
+					matchCount++;
+				else
+					break;
+
+				if (matchCount == 4) //received message is "Done"
+					transmitting = false;
+			}
+
+			if (transmitting)
+			{
+				//store incoming message in a list of characters
+				for (int i = 0; i < sizeof(M); i++)
+				{
+					if (M[i] == NULL)
+						break;
+					else
+						message.push_back(M[i]);
+				}
+				//convert message into a string
+				string messageString;
+				for (list<char>::iterator it = message.begin(); it != message.end(); it++)
+					messageString.append(1u, *it);
+
+				//convert the string into binary bitsets
+				list<bool> FrameWithCRC;
+				FrameWithCRC = ConvertToBoolList(messageString);
+
+				if (IsCRCValid(FrameWithCRC))
+				{
+
+					list<char> convertedMessage;
+					list<bitset<8>> deFramedData;
+					deFramedData = DeFrame(FrameWithCRC);
+					convertedMessage = ConvertBinaryMessage(deFramedData);
+
+					//print message
+					PrintList(convertedMessage);
+
+					//send confirmation
+					send(newConnection, accepted, sizeof(accepted), NULL);
+				}
+				else //send rejection
+					send(newConnection, rejected, sizeof(rejected), NULL);
+
+				message.clear();
+			}
+		}
+	}
+	cout << endl;
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Converts a string into a list of bools
+//
+//	Arguments:	[in]string: frame
+//
+//	Return:		[out]list<bool>:list of bools representing
+//									 the frame					
+////////////////////////////////////////////////////////////////
+list<bool> ConvertToBoolList(string message)
+{
+	list<bool> binaryCharacters;
+	const int ASCII_CONVERTER = 48;
+
+	for (size_t i = 0; i < message.size(); i++)
+		binaryCharacters.push_back((message[i] - ASCII_CONVERTER) != 0);
+
+	return binaryCharacters;
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Checks that the message had no transmission
+//				errors.
+//
+//	Arguments:	[in]list<bool>:list of bitsets representing
+//							   the frame
+//
+//	Return:		[out]bool:indicates if the message is valid
+//						  or not
+//	Ret Value:	true if valid message, false if invalid
+////////////////////////////////////////////////////////////////
+bool IsCRCValid(list<bool> binaryCharacters)
+{
+	//Initialize CRC as 0s
+	array<bool, 16> CRC;
+	for (size_t i = 0; i< CRC.size(); ++i)
+		CRC[i] = 0;
+
+	//Simulate shift registers
+	bool nextBit;
+	for (list<bool>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
+	{
+		//Get Next Bit
+		if (*it == 1)
+			nextBit = 1;
+		else
+			nextBit = 0;
+
+		//XOR next bit with MSB of registers
+		nextBit = nextBit ^ CRC[15];
+
+		//Include XOR gates in order to create the polynomial X16 + X15 + X2 + 1
+		CRC[15] = CRC[14] ^ nextBit;
+		CRC[14] = CRC[13];
+		CRC[13] = CRC[12];
+		CRC[12] = CRC[11];
+		CRC[11] = CRC[10];
+		CRC[10] = CRC[9];
+		CRC[9] = CRC[8];
+		CRC[8] = CRC[7];
+		CRC[7] = CRC[6];
+		CRC[6] = CRC[5];
+		CRC[5] = CRC[4];
+		CRC[4] = CRC[3];
+		CRC[3] = CRC[2];
+		CRC[2] = CRC[1] ^ nextBit;
+		CRC[1] = CRC[0];
+		CRC[0] = nextBit;
+	}
+
+	//Check that the remainder only has 0s
+	for (size_t i = 0; i < CRC.size(); i++)
+	{
+		if (CRC[i] == 1)
+			return false;
+	}
+
+	return true;
+}
+
+/**************************************************************/
+/***************************Hamming****************************/
+/**************************************************************/
+
+////////////////////////////////////////////////////////////////
+//	Description:Starts the server connection, receives the
+//				messages transmitted, calls methods for checking
+//				the validity of the messages, attempts to 
+//				correct it if there is an error and prints out
 //				the messages to the console
 ////////////////////////////////////////////////////////////////
 void ReceiveHammingMessage()
@@ -134,185 +354,50 @@ void ReceiveHammingMessage()
 }
 
 ////////////////////////////////////////////////////////////////
-//	Description:Starts the server connection, receives the
-//				messages transmitted, calls methods for checking		/////////////////////////////fix
-//				the validity of the messages and printing out
-//				the messages to the console
-////////////////////////////////////////////////////////////////
-void ReceiveCRCMessage()
-{
-	//Startup
-	WSAData wsaData;
-	int		sizeOfAddr;
-	WORD DllVersion = MAKEWORD(2, 1);
-
-	if (WSAStartup(DllVersion, &wsaData) != 0)
-	{
-		MessageBoxA(NULL, "WinSock startup failed", "Error", MB_OK | MB_ICONERROR);
-		return;
-	}
-
-	SOCKADDR_IN address;
-	sizeOfAddr = sizeof(address);
-	address.sin_addr.s_addr = inet_addr("127.0.0.1");
-	address.sin_port = htons(1111);
-	address.sin_family = AF_INET;
-
-	SOCKET sListen = socket(AF_INET, SOCK_STREAM, NULL);
-	bind(sListen, (SOCKADDR*)&address, sizeof(address));
-	listen(sListen, SOMAXCONN);
-
-
-	SOCKET newConnection;
-	newConnection = accept(sListen, (SOCKADDR*)&address, &sizeOfAddr);
-
-	if (newConnection == 0)
-	{
-		cout << "Failed to accept the client's connection." << endl;
-	}
-	else
-	{
-		cout << "Client Connected!" << endl;
-		bool transmitting = true;
-		char accepted[1] = { 1 };
-		char rejected[1] = { 0 };
-
-		char M[553];
-		list<char> finalMessage = { 'D','o','n','e' };
-		list<char> message;
-
-		while (transmitting)
-		{
-			recv(newConnection, M, sizeof(M), NULL); //Receive Message
-
-			//Check if done receiving
-			int matchCount = 0;
-			for (list<char>::iterator it = finalMessage.begin(); it != finalMessage.end(); it++)
-			{
-				if (*it == M[matchCount])
-					matchCount++;
-				else
-					break;
-
-				if (matchCount == 4) //received message is "Done"
-					transmitting = false;
-			}
-
-			if (transmitting)
-			{
-				//store incoming message in a list of characters
-				for (int i = 0; i < sizeof(M); i++)
-				{
-					if (M[i] == NULL)
-						break;
-					else
-						message.push_back(M[i]);
-				}
-				//convert message into a string
-				string messageString;
-				for (list<char>::iterator it = message.begin(); it != message.end(); it++)
-					messageString.append(1u, *it);
-
-				//convert the string into binary bitsets
-				list<bool> FrameWithCRC;
-				FrameWithCRC = ConvertToBoolList(messageString);
-
-				if (IsCRCValid(FrameWithCRC))
-				{
-
-					list<char> convertedMessage;
-					list<bitset<8>> deFramedData;
-					deFramedData = DeFrame(FrameWithCRC);
-					convertedMessage = ConvertBinaryMessage(deFramedData);
-
-					//print message
-					PrintList(convertedMessage);
-
-					//send confirmation
-					send(newConnection, accepted, sizeof(accepted), NULL);
-				}
-				else //send rejection
-					send(newConnection, rejected, sizeof(rejected), NULL);
-
-				message.clear();
-			}
-		}
-	}
-	cout << endl;
-}
-
-
-
-////////////////////////////////////////////////////////////////
 //	Description:Separates a string of binary characters into
-//				8 bit bitsets and inverts the data characters
-//				as they were transmitted with LSB first
+//				12 bit bitsets
 //
 //	Arguments:	[in]string: message
 //
-//	Return:		[out]list<bitset<8>>:list of bitsets representing
-//									 the message						//////////
+//	Return:		[out]list<bitset<12>>:list of bitsets representing
+//									 the received frame
 ////////////////////////////////////////////////////////////////
-list<bitset<12>> ConvertToBitsets(string message)
+list<bitset<12>> ConvertToBitsets(string frame)
 {
 	list<bitset<12>> binaryCharacters;
 
 	//get syn chars
 	for (int i = 0; i < 24; i += 12)
 	{
-		string synCharacter = message.substr(i, 12);
+		string synCharacter = frame.substr(i, 12);
 		bitset<12> binaryCharacter(synCharacter);
 		binaryCharacters.push_back(binaryCharacter);
 	}
 
 	//get control char
-	string controlCharacter = message.substr(24, 12);
+	string controlCharacter = frame.substr(24, 12);
 	bitset<12> binaryCharacter(controlCharacter);
 	binaryCharacters.push_back(binaryCharacter);
 
-	for (size_t i = 36; i < message.size(); i += 12)
+	for (size_t i = 36; i < frame.size(); i += 12)
 	{
-		string character = message.substr(i, 12);
+		string character = frame.substr(i, 12);
 
-		//reverse character because it was received by LSB first
-		//bitset<8> reversedBinaryCharacter(character);
 		bitset<12> binaryCharacter(character);
-		//for (size_t j = 0; j < reversedBinaryCharacter.size(); j++)
-			//binaryCharacter[binaryCharacter.size() - 1 - j] = (reversedBinaryCharacter)[j];
 
 		binaryCharacters.push_back(binaryCharacter);
 	}
-
-	return binaryCharacters;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Separates a string of binary characters into
-//				8 bit bitsets and inverts the data characters
-//				as they were transmitted with LSB first
-//
-//	Arguments:	[in]string: message
-//
-//	Return:		[out]list<bitset<8>>:list of bitsets representing
-//									 the message						//////////Include reversing
-////////////////////////////////////////////////////////////////
-list<bool> ConvertToBoolList(string message)
-{
-	list<bool> binaryCharacters;
-	const int ASCII_CONVERTER = 48;
-
-	for (size_t i = 0; i < message.size(); i++)
-		binaryCharacters.push_back(message[i] - ASCII_CONVERTER);
 
 	return binaryCharacters;
 }
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the message had no transmission
-//				errors. This will be expanded in future milestones
+//				errors. If there are errors, it attempts to
+//				correct them.
 //
-//	Arguments:	[in]list<bitset<8>>:list of bitsets representing
-//									 the message
+//	Arguments:	[in]list<bitset<12>>&:list of bitsets representing
+//									 the frame
 //
 //	Return:		[out]bool:indicates if the message is valid
 //						  or not
@@ -350,65 +435,18 @@ bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived)
 	}
 	return true;
 }
-//////////////////////////////////////////////
-bool IsCRCValid(list<bool> binaryCharacters)
-{
-	//Initialize CRC as 0s
-	array<bool, 16> CRC;
-	for (int i = 0; i< CRC.size(); ++i)
-		CRC[i] = 0;
-
-	//Simulate shift registers
-	bool nextBit;
-	for (list<bool>::iterator it =binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-	{
-		//Get Next Bit
-		if (*it == 1)
-			nextBit = 1;
-		else
-			nextBit = 0;
-
-		//XOR next bit with MSB of registers
-		nextBit = nextBit ^ CRC[15];
-
-		//Include XOR gates in order to create the polynomial X16 + X15 + X2 + 1
-		CRC[15] = CRC[14] ^ nextBit;
-		CRC[14] = CRC[13];
-		CRC[13] = CRC[12];
-		CRC[12] = CRC[11];
-		CRC[11] = CRC[10];
-		CRC[10] = CRC[9];
-		CRC[9] = CRC[8];
-		CRC[8] = CRC[7];
-		CRC[7] = CRC[6];
-		CRC[6] = CRC[5];
-		CRC[5] = CRC[4];
-		CRC[4] = CRC[3];
-		CRC[3] = CRC[2];
-		CRC[2] = CRC[1] ^ nextBit;
-		CRC[1] = CRC[0];
-		CRC[0] = nextBit;
-	}
-
-	//Erase leading 0s
-	for (int i = 0; i < CRC.size(); i++)
-	{
-		if (CRC[i] == 1)
-			return false;
-	}
-
-	return true;
-}
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the parity bit of the input bitset
-//				is correct
+//				is correct. It also stores the location of the
+//				error bit
 //
-//	Arguments:	[in]bitset<8>:binary bitset with a parity bit
+//	Arguments:	[in]bitset<12>:binary bitset with a parity bit
 //
-//	Return:		[out]bool:indicates if the bitset has the 
-//						  correct parity bit
-//	Ret Value:	true if correct parity, false if incorrect
+//	Return:		[out]HammingErrorDetection: bool indicating
+//					 whether the parity is correct for that
+//					 bitset and if it is incorrect it also
+//					 contains the location of the error bit
 ////////////////////////////////////////////////////////////////
 HammingErrorDetection CheckHammingParity(bitset<12> binaryChar)
 {
@@ -511,42 +549,4 @@ HammingErrorDetection CheckHammingParity(bitset<12> binaryChar)
 		error.isHammingCorrect = true;
 
 	return error;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts a list of bitsets into a list of
-//				characters. It calls ConvertBinaryToChar for
-//				the conversion of each specific bitset
-//
-//	Arguments:	[in]list<bitset<8>>:list of all the bitsets
-//									 to be converted
-//
-//	Return:		[out]list<char>:list of all the characters
-//								converted
-////////////////////////////////////////////////////////////////
-list<char> ConvertBinaryMessage(list< bitset<8>> binaryCharacters)
-{
-	list<char> convertedMessage;
-
-	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-		convertedMessage.push_back(it->to_ulong());
-
-	return convertedMessage;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts a bitset into a character
-//
-//	Arguments:	[in]bitset<8>:binary char
-//
-//	Return:		[out]char: character obtained from the binary
-////////////////////////////////////////////////////////////////
-char ConvertBinaryToChar(bitset<8> binaryChar)
-{
-	bitset<7> charWithoutParityBit;
-
-	for (size_t i = 1; i <= binaryChar.size() - 1; i++)
-		charWithoutParityBit[i - 1] = binaryChar[i];
-
-	return char(charWithoutParityBit.to_ulong());
 }

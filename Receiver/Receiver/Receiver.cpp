@@ -15,7 +15,7 @@
 
 int main(int argc, const char* argv[])
 {
-	//Check if the application will be run in test mode
+	//Check the mode that the application will be running
 	if (argv[1] != nullptr)
 	{
 		string mode = argv[1];

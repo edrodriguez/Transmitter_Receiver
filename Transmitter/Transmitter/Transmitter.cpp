@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 		{
 			cout << "Running Tests for Transmitter" << endl;
 			RunPhysicalLayerTests();
-			//RunDataLinkTests();
+			RunDataLinkTests();
 			return 0;
 		}
 		else

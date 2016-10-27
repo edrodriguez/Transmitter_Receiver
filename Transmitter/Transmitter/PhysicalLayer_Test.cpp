@@ -18,103 +18,61 @@ void RunPhysicalLayerTests()
 	CalculateCRC_Input0000000_Return0000001111000000();
 }
 
-//void ConvertToBinary_InputA_Returns1000001()
-//{
-//	char input = 'A';
-//	bitset<7> expectedOutput(string("1000001"));
-//	bitset<7> actualOutput;
-//
-//	actualOutput = ConvertToBinary(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test ConvertToBinary_InputA_Returns1000001 PASSED" << endl;
-//	else
-//		std::cout << "Test ConvertToBinary_InputA_Returns1000001 FAILED" << endl;
-//}
-//
-//void ConvertToBinary_Inputa_Returns1100001()
-//{
-//	char input = 'a';
-//	bitset<7> expectedOutput(string("1100001"));
-//	bitset<7> actualOutput;
-//
-//	actualOutput = ConvertToBinary(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test ConvertToBinary_Inputa_Returns1100001 PASSED" << endl;
-//	else
-//		std::cout << "Test ConvertToBinary_Inputa_Returns1100001 FAILED" << endl;
-//}
-//
-//void ConvertToBinary_Input0_Returns0110000()
-//{
-//	char input = '0';
-//	bitset<7> expectedOutput(string("0110000"));
-//	bitset<7> actualOutput;
-//
-//	actualOutput = ConvertToBinary(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test ConvertToBinary_Input0_Returns0110000 PASSED" << endl;
-//	else
-//		std::cout << "Test ConvertToBinary_Input0_Returns0110000 FAILED" << endl;
-//}
-//
-//void ConvertToBinary_Input$_Returns0100100()
-//{
-//	char input = '$';
-//	bitset<7> expectedOutput(string("0100100"));
-//	bitset<7> actualOutput;
-//
-//	actualOutput = ConvertToBinary(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test ConvertToBinary_Input0_Returns0100100 PASSED" << endl;
-//	else
-//		std::cout << "Test ConvertToBinary_Input0_Returns0100100 FAILED" << endl;
-//}
-//
-//void IsOddParity_Input1000001_ReturnFalse()
-//{
-//	bitset<7>input(string("1000001"));
-//	bool expectedOutput = false;
-//	bool actualOutput;
-//
-//	actualOutput = IsOddParity(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test IsOddParity_Input1000001_ReturnFalse PASSED" << endl;
-//	else
-//		std::cout << "Test IsOddParity_Input1000001_ReturnFalse FAILED" << endl;
-//}
-//
-//void IsOddParity_Input1100001_ReturnTrue()
-//{
-//	//TO-DO Change string() not necessary
-//	bitset<7>input(string("1100001"));
-//	bool expectedOutput = true;
-//	bool actualOutput;
-//
-//	actualOutput = IsOddParity(input);
-//
-//	if (actualOutput == expectedOutput)
-//		std::cout << "Test IsOddParity_Input1100001_ReturnFalse PASSED" << endl;
-//	else
-//		std::cout << "Test IsOddParity_Input1100001_ReturnFalse FAILED" << endl;
-//}
-//
-//void GenerateTransmissionError_Input000000000001_ReturnChangeInOneBit()
-//{
-//	string input = "000000000001";
-//	string expectedOutput = "000000000011";
-//	string actualOutput;
-//
-//	//GenerateTransmissionError(input, 1);
-//
-//	actualOutput = input;
-//
-//	cout << input << endl;
-//}
+void ConvertToBinary_InputA_Returns01000001()
+{
+	char input = 'A';
+	bitset<8> expectedOutput(string("01000001"));
+	bitset<8> actualOutput;
+
+	actualOutput = ConvertToBinary(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test ConvertToBinary_InputA_Returns01000001 PASSED" << endl;
+	else
+		std::cout << "Test ConvertToBinary_InputA_Returns01000001 FAILED" << endl;
+}
+
+void ConvertToBinary_Inputa_Returns01100001()
+{
+	char input = 'a';
+	bitset<8> expectedOutput(string("01100001"));
+	bitset<8> actualOutput;
+
+	actualOutput = ConvertToBinary(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test ConvertToBinary_Inputa_Returns01100001 PASSED" << endl;
+	else
+		std::cout << "Test ConvertToBinary_Inputa_Returns01100001 FAILED" << endl;
+}
+
+void ConvertToBinary_Input0_Returns00110000()
+{
+	char input = '0';
+	bitset<8> expectedOutput(string("00110000"));
+	bitset<8> actualOutput;
+
+	actualOutput = ConvertToBinary(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test ConvertToBinary_Input0_Returns00110000 PASSED" << endl;
+	else
+		std::cout << "Test ConvertToBinary_Input0_Returns00110000 FAILED" << endl;
+}
+
+void ConvertToBinary_Input$_Returns00100100()
+{
+	char input = '$';
+	bitset<8> expectedOutput(string("00100100"));
+	bitset<8> actualOutput;
+
+	actualOutput = ConvertToBinary(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test ConvertToBinary_Input$_Returns00100100 PASSED" << endl;
+	else
+		std::cout << "Test ConvertToBinary_Input$_Returns00100100 FAILED" << endl;
+}
 
 void CalculateHammingCode_Input00000000_Return000000000000()
 {
@@ -161,7 +119,6 @@ void CalculateHammingCode_Input11111111_Return111011101111()
 void CalculateCRC_Input0000000_Return0000001111000000()
 {
 	CRCFrame input;
-	//input.synChar1[0] = 1;
 	input.data.push_back(bitset<8>("10100000"));
 	list<bool> expectedOutput{ 0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0 };
 
