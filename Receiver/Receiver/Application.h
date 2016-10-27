@@ -16,15 +16,3 @@ using namespace std;
 ////Auxiliary method for printing list
 ////////////////////
 void PrintList(list<char> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<string> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<7>> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<8>> l);

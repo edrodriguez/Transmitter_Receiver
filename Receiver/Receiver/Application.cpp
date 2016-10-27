@@ -20,27 +20,3 @@ void PrintList(list<char> l)
 	for (list<char>::iterator it = l.begin(); it != l.end(); it++)
 		cout << *it;
 }
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<string> l)
-{
-	for (list<string>::iterator it = l.begin(); it != l.end(); it++)
-		cout << *it;
-}
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<7>> l)
-{
-	for (list<bitset<7>>::iterator it = l.begin(); it != l.end(); it++)
-		cout << *it << ' ';
-}
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<8>> l)
-{
-	for (list<bitset<8>>::iterator it = l.begin(); it != l.end(); it++)
-		cout << *it << ' ';
-}
