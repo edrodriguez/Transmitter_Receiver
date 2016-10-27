@@ -14,6 +14,7 @@
 #include <bitset>
 #include <list>
 #include <random> 
+#include <array>
 
 using namespace std;
 
@@ -161,6 +162,11 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 				}
 			} while (accepted[0] == 0 && retryCount < 5);
+			if (retryCount == 5)
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+				break;
+			}
 		}
 	}
 	//Send only messages without errors
@@ -192,6 +198,11 @@ void TransmitFrames(list<HammingFrame> frames, int numOfErrors)				/////////hamm
 					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 				}
 			} while (accepted[0] == 0 && retryCount < 5);
+			if (retryCount == 5)
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+				break;
+			}
 		}
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
@@ -276,6 +287,11 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors)				/////////CRC over
 					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 				}
 			} while (accepted[0] == 0 && retryCount < 5);
+			if (retryCount == 5)
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+				break;
+			}
 		}
 	}
 	//Send only messages without errors
@@ -307,6 +323,11 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors)				/////////CRC over
 					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 				}
 			} while (accepted[0] == 0 && retryCount < 5);
+			if (retryCount == 5)
+			{
+				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+				break;
+			}
 		}
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
@@ -609,13 +630,14 @@ bitset<12> CalculateHammingCode(bitset<8> byteOfData)
 
 void CalculateCRC(CRCFrame &frame)
 {
-	bitset<17> CRCANSI("11000000000000101");
-	size_t remainderSize = CRCANSI.size() - 1;
-	list<bool> D;
-	list<bool> CRC;
+	//Initialize CRC as 0s
+	array<bool, 16> CRC;
+	for (int i = 0; i< CRC.size(); ++i)
+		CRC[i] = 0;
 
 	//Copy data from the frame into D
-	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	list<bool> D;
+	for (list<bitset<8>>::reverse_iterator it = frame.data.rbegin(); it != frame.data.rend(); it++)
 	{
 		for (size_t i = 0; i < it->size(); i++)
 		{
@@ -628,69 +650,45 @@ void CalculateCRC(CRCFrame &frame)
 
 	for (size_t i = 0; i < frame.synChar2.size(); i++)
 		D.push_front(frame.synChar2[i]);
-	
+
 	for (size_t i = 0; i < frame.synChar1.size(); i++)
 		D.push_front(frame.synChar1[i]);
 
-
-	//Multiply D by 2^(n-k)
-	for (size_t i = 0; i < remainderSize; i++)
-		D.push_back(0);
-
-	//Perform long division
-	list<bool> dividend;
-
-	//Get n-k digits as the dividend
-	while (!D.empty())
+	//Simulate shift registers
+	bool nextBit;
+	for (list<bool>::iterator it = D.begin(); it != D.end(); it++)
 	{
-		while (dividend.size() < CRCANSI.size() && !D.empty())
-		{
-			dividend.push_back(*(D.begin()));
-			D.pop_front();
-		}
+		//Get Next Bit
+		if (*it == 1)
+			nextBit = 1;
+		else
+			nextBit = 0;
 
-		if (dividend.size() == CRCANSI.size())
-		{
-			//Perform XOR Operation
-			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
-		}
+		//XOR next bit with MSB of registers
+		nextBit = nextBit ^ CRC[15];
+
+		//Include XOR gates in order to create the polynomial X16 + X15 + X2 + 1
+		CRC[15] = CRC[14] ^ nextBit;
+		CRC[14] = CRC[13];
+		CRC[13] = CRC[12];
+		CRC[12] = CRC[11];
+		CRC[11] = CRC[10];
+		CRC[10] = CRC[9];
+		CRC[9] = CRC[8];
+		CRC[8] = CRC[7];
+		CRC[7] = CRC[6];
+		CRC[6] = CRC[5];
+		CRC[5] = CRC[4];
+		CRC[4] = CRC[3];
+		CRC[3] = CRC[2];
+		CRC[2] = CRC[1] ^ nextBit;
+		CRC[1] = CRC[0];
+		CRC[0] = nextBit;
 	}
 
-	for (list<bool>::iterator it = dividend.begin(); it != dividend.end(); it++)
-		CRC.push_back(*it);  ///cHECK PUSHING
-
-							 //Add leading 0s to match n-k size
-	while (CRC.size() < remainderSize)
-		CRC.push_front(0);  ///CHECK PUSHING
-
-	frame.CRCCode = CRC;
-
-}
-
-list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2)
-{
-	bitset<17> b1;
-	bitset<17> result;
 	list<bool> outResult;
+	for (int i = 0; i < CRC.size(); i++)
+		outResult.push_front(CRC[i]);
 
-	int index = b1.size() - 1;
-	for (list<bool>::iterator it = l.begin(); it != l.end(); it++)
-	{
-		b1[index] = *it;
-		index--;
-	}
-
-	//XOR
-	result = b1^b2;
-
-	for (size_t i = 0; i < result.size(); i++)
-	{
-		outResult.push_front(result[i]);
-	}
-
-	//Erase leading 0s
-	while (!outResult.empty() && *(outResult.begin()) != 1)
-		outResult.pop_front();
-
-	return outResult;
+	frame.CRCCode = outResult;
 }

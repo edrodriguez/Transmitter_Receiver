@@ -7,13 +7,14 @@
 ////////////////////////////////////////////////////////////////
 #pragma comment(lib,"ws2_32.lib")
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include "PhysicalLayer.h"
+#include "Application.h"
+#include "DataLink.h"
 #include <WinSock2.h>
 #include <iostream>
 #include <bitset>
 #include <list>
-#include "PhysicalLayer.h"
-#include "Application.h"
-#include "DataLink.h"
+#include <array>
 
 using namespace std;
 
@@ -352,64 +353,52 @@ bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived)
 //////////////////////////////////////////////
 bool IsCRCValid(list<bool> binaryCharacters)
 {
-	bitset<17> CRCANSI("11000000000000101");
-	list<bool> D = binaryCharacters;
-	list<bool> dividend;
-	bool correctMessage = true;
+	//Initialize CRC as 0s
+	array<bool, 16> CRC;
+	for (int i = 0; i< CRC.size(); ++i)
+		CRC[i] = 0;
 
-	while (!D.empty())
+	//Simulate shift registers
+	bool nextBit;
+	for (list<bool>::iterator it =binaryCharacters.begin(); it != binaryCharacters.end(); it++)
 	{
-		while (dividend.size() < CRCANSI.size() && !D.empty())
-		{
-			dividend.push_back(*(D.begin()));
-			D.pop_front();
-		}
+		//Get Next Bit
+		if (*it == 1)
+			nextBit = 1;
+		else
+			nextBit = 0;
 
-		if (dividend.size() == CRCANSI.size())
-		{
-			//Perform XOR Operation
-			dividend = PerformXORWithCRCANSI(dividend, CRCANSI);
-		}
+		//XOR next bit with MSB of registers
+		nextBit = nextBit ^ CRC[15];
+
+		//Include XOR gates in order to create the polynomial X16 + X15 + X2 + 1
+		CRC[15] = CRC[14] ^ nextBit;
+		CRC[14] = CRC[13];
+		CRC[13] = CRC[12];
+		CRC[12] = CRC[11];
+		CRC[11] = CRC[10];
+		CRC[10] = CRC[9];
+		CRC[9] = CRC[8];
+		CRC[8] = CRC[7];
+		CRC[7] = CRC[6];
+		CRC[6] = CRC[5];
+		CRC[5] = CRC[4];
+		CRC[4] = CRC[3];
+		CRC[3] = CRC[2];
+		CRC[2] = CRC[1] ^ nextBit;
+		CRC[1] = CRC[0];
+		CRC[0] = nextBit;
 	}
 
 	//Erase leading 0s
-	while (!dividend.empty() && *(dividend.begin()) != 1)
-		dividend.pop_front();
-
-	if (!dividend.empty())
-		return false;
+	for (int i = 0; i < CRC.size(); i++)
+	{
+		if (CRC[i] == 1)
+			return false;
+	}
 
 	return true;
 }
-
-list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2)
-{
-	bitset<17> b1;
-	bitset<17> result;
-	list<bool> outResult;
-
-	int index = b1.size() - 1;
-	for (list<bool>::iterator it = l.begin(); it != l.end(); it++)
-	{
-		b1[index] = *it;
-		index--;
-	}
-
-	//XOR
-	result = b1^b2;
-
-	for (size_t i = 0; i < result.size(); i++)
-	{
-		outResult.push_front(result[i]);
-	}
-
-	//Erase leading 0s
-	while (!outResult.empty() && *(outResult.begin()) != 1)
-		outResult.pop_front();
-
-	return outResult;
-}
-
 
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the parity bit of the input bitset

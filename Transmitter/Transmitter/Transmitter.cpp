@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
 			//Convert file text to binary
 			binaryData = ConvertTextForTransmission(infoFromFile);
-			cout << "----------Binary Representation of each Character----------" << endl;
+			cout << "----------Binary Representation of Each Character----------" << endl;
 			PrintList(binaryData);
 			cout << endl;
 

@@ -77,9 +77,6 @@ bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived);
 ////////////////////////////////////////////////////////////////
 bool IsCRCValid(list<bool> binaryCharacters);
 
-///////////////////////////////////////////////
-list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2);
-
 ////////////////////////////////////////////////////////////////
 //	Description:Checks that the parity bit of the input bitset
 //				is correct
