@@ -13,35 +13,9 @@
 
 using namespace std;
 
-////////////////////////////////////////////////////////////////
-//	Description:generates a list of string with each entry
-//				containing a string representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message) and up to 64 information characters			////////////////change
-//
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
-//									in a binary bitset
-//
-//	Return:		[out]list<string>:list of strings containing
-//								  all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frame);  //hamming overload
-
-////////////////////////////////////////////////////////////////
-//	Description:generates a list of string with each entry
-//				containing a string representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message) and up to 64 information characters			////////////////change
-//
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
-//									in a binary bitset
-//
-//	Return:		[out]list<string>:list of strings containing
-//								  all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frame); //crc overload
+/**************************************************************/
+/****************************Common****************************/
+/**************************************************************/
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a string containing the ASCII Syn char
@@ -86,3 +60,44 @@ bitset<8> IncludeControlChar(list<bitset<8>> block);
 //						 in the block
 ////////////////////////////////////////////////////////////////
 int CountCharsInBlock(list<bitset<8>> block);
+
+/**************************************************************/
+/*****************************CRC******************************/
+/**************************************************************/
+
+////////////////////////////////////////////////////////////////
+//	Description:Generates a list a frame with each entry
+//				containing a CRCFrame representing a message. Each
+//				one containing two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message), up to 64 information characters and
+//				a CRC code at the end for error detection
+//
+//	**CRC Overload
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in binary bitsets
+//				[out]list<CRCFrame>:list of CRCFrames containing
+//								  all the framed messages
+////////////////////////////////////////////////////////////////
+void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frame);
+
+/**************************************************************/
+/***************************Hamming****************************/
+/**************************************************************/
+
+////////////////////////////////////////////////////////////////
+//	Description:Generates a list a frame with each entry
+//				containing a CRCFrame representing a message. Each
+//				one containing two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message), up to 64 information characters. Each
+//				character composed of 8 information bits and 4
+//				hamming parity bits
+//
+//	**Hamming Overload
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in binary bitsets
+//				[out]list<HammingFrrame>:list of CRCFrames containing
+//								         all the framed messages
+////////////////////////////////////////////////////////////////
+void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frame);

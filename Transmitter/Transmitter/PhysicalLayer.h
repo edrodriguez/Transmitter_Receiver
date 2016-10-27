@@ -3,18 +3,21 @@
 //	Description:This file contains the declaration of functions
 //				of the physical layer of the transmitter.
 //				This layer is in charge of converting the
-//				message to binary and transmitting it
+//				message to binary, applying CRC or Hamming
+//				and transmitting the message
 ////////////////////////////////////////////////////////////////
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib")
 #include <WinSock2.h>
 #include <string>
 #include <list>
-#include <vector>
 #include <bitset>
 
 using namespace std;
 
+/**************************************************************/
+/***********************Structs for Data***********************/
+/**************************************************************/
 struct CRCFrame
 {
 	bitset<8> synChar1;
@@ -32,19 +35,16 @@ struct HammingFrame
 	list<bitset<12>> data;
 };
 
-struct Message
-{
-	list<HammingFrame> HammingFrames;
-	list<CRCFrame> CRCFrames;
-};
-
 struct TransmissionError
 {
 	int frameLocation;
 	int charLocation;
 	int bitLocation;
-	Message messageWithErrors;
 };
+
+/**************************************************************/
+/****************************Common****************************/
+/**************************************************************/
 
 ////////////////////////////////////////////////////////////////
 //	Description: converts a list of characters into a list of
@@ -67,53 +67,132 @@ list<bitset<8>> ConvertTextForTransmission(list<char> charList);
 ////////////////////////////////////////////////////////////////
 bitset<8> ConvertToBinary(char C);
 
-
-////////////////////////////////////////////////////////////////////////////////////Describe
-void ConnectSocket(SOCKET &Connection);
+/**************************************************************/
+/*****************************CRC******************************/
+/**************************************************************/
 
 ////////////////////////////////////////////////////////////////
-//	Description:Starts the client connection and transmits all the
-//				messages composed of binary characters
+//	Description:Calculates the CRC code for the frame using a
+//				shift register simulation approach
 //
-//	Arguments:	[in]list<string>: list containing all the messages		////////////change
-//				[in]int:number of errors to be introduced during
-//					transmission
+//	Arguments:	[in]CRCFrame&: Frame to be used for calculation
 //
 ////////////////////////////////////////////////////////////////
-void TransmitFrames(list<HammingFrame> frames, int numOfErrors);   /////////////////////hamming overload
+void CalculateCRC(CRCFrame &frame);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Starts the client connection and transmits all the
-//				messages composed of binary characters
+//				messages composed of binary characters (with
+//				possible transmission errors given by numOfErrors)
 //
-//	Arguments:	[in]list<string>: list containing all the messages		////////////change
+//	**CRC Overload
+//	Arguments:	[in]list<CRC>: list containing all the
+//							   frames to be transmitted
 //				[in]int:number of errors to be introduced during
-//					transmission
+//					    transmission
 //
 ////////////////////////////////////////////////////////////////
-void TransmitFrames(list<CRCFrame> frames, int numOfErrors);   /////////////////////crc overload
+void TransmitFrames(list<CRCFrame> frames, int numOfErrors);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Changes the number of bits indicated
 //				in the input parameter in a random position in
 //				the message
 //
-//	Arguments:	[in]int (optional): Number of bits to change.		/////////////change
-//									Default value: 0.
+//	**CRC Overload
+//	Arguments:	[in]list<CRCFrame>: frames containing the
+//									data without errors
+//				[out]list<CRCFrame>&: frames containing the
+//									  data with errors
+//				[in]int*: Number of bits to change.
 //
-////////////////////////////////////////////////////////////////     ///////////hamming overload
-list<TransmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int *numberOfBitsToChange);
+//	Return:		[out]list<TransmissionError>:list of the location
+//										   of errors in the frame
+////////////////////////////////////////////////////////////////
+list<TransmissionError> GenerateTransmissionError(list<CRCFrame> frames,
+												  list<CRCFrame> &framesWithErrors,
+												  int numberOfBitsToChange);
 
-//////////////////////////////crc overload
-list<TransmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors, int numberOfBitsToChange);
+////////////////////////////////////////////////////////////////
+//	Description:Copies the frames to a different list
+//
+//	**CRC Overload
+//	Arguments:	[in]list<CRCFrame>: Original list
+//				[out]list<CRCFrame>&: Copy of the frames
+//
+////////////////////////////////////////////////////////////////
+void CopyFrames(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors);
 
-void CopyDataForErrorGeneration(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors);
+/**************************************************************/
+/***************************Hamming****************************/
+/**************************************************************/
 
-//////////crc
-void CopyDataForErrorGeneration(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors);
-
+////////////////////////////////////////////////////////////////
+//	Description:iterates through the data list to generate the
+//				hamming code for each character by calling
+//				CalculateHammingCode on each one of them
+//
+//	Arguments:	[in]list<bitset<8>>: list containing the binary
+//									 representation of each
+//									 character read from the file
+//
+//	Return:		[out]list<bitset<12>>: binary characters with
+//									   hamming parity bits
+////////////////////////////////////////////////////////////////
 list<bitset<12>> GenerateHammingForData(list<bitset<8>> data);
 
+////////////////////////////////////////////////////////////////
+//	Description:Performs the calculation of 4 hamming parity bits
+//
+//	Arguments:	[in]bitset<8>: binary representation of a
+//							   character
+//
+//	Return:		[out]bitset<12>: binary character with
+//								 hamming parity bits
+////////////////////////////////////////////////////////////////
 bitset<12> CalculateHammingCode(bitset<8> byteOfData);
 
-void CalculateCRC(CRCFrame &frame);
+////////////////////////////////////////////////////////////////
+//	Description:Starts the client connection and transmits all the
+//				messages composed of binary characters (with
+//				possible transmission errors given by numOfErrors)
+//
+//	**Hamming Overload
+//	Arguments:	[in]list<HammingFrame>: list containing all the
+//										frames to be transmitted
+//				[in]int:number of errors to be introduced during
+//					    transmission
+//
+////////////////////////////////////////////////////////////////
+void TransmitFrames(list<HammingFrame> frames, int numOfErrors); 
+
+////////////////////////////////////////////////////////////////
+//	Description:Changes the number of bits indicated
+//				in the input parameter in a random position in
+//				the message.
+//	**Note: This function will make sure 2 errors are not
+//			generated in the same character
+//
+//	**Hamming Overload
+//	Arguments:	[in]list<HammingFrame>: frames containing the
+//										data without errors
+//				[out]list<HammingFrame>&: frames containing the
+//										data with errors
+//				[in]int*: Number of bits to change.
+//
+//	Return:		[out]list<TransmissionError>:list of the location
+//										   of errors in the frame
+////////////////////////////////////////////////////////////////
+list<TransmissionError> GenerateTransmissionError(list<HammingFrame> frames,
+												  list<HammingFrame> &framesWithErrors,
+												  int *numberOfBitsToChange);
+
+////////////////////////////////////////////////////////////////
+//	Description:Copies the frames to a different list
+//
+//	**Hamming Overload
+//	Arguments:	[in]list<HammingFrame>: Original list
+//				[out]list<HammingFrame>&: Copy of the frames
+//
+////////////////////////////////////////////////////////////////
+void CopyFrames(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors);

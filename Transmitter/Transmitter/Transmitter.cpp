@@ -3,17 +3,18 @@
 //				transmitter application. It calls fucntions in
 //				all layers of the transmitter, in order to get
 //				the information from an input file, convert it
-//				to the proper binary format and transmit it
+//				to the proper binary format, apply CRC or
+//				Hamming and transmit the message
 ////////////////////////////////////////////////////////////////
-#include <iostream>
-#include <bitset>
-#include <list>
-#include <string>
 #include "Application.h"
 #include "DataLink.h"
 #include "PhysicalLayer.h"
 #include "PhysicalLayer_Test.h"
 #include "DataLink_Test.h"
+#include <iostream>
+#include <bitset>
+#include <list>
+#include <string>
 
 using namespace std;
 

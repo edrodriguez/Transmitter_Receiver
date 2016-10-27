@@ -10,6 +10,10 @@
 
 using namespace std;
 
+/**************************************************************/
+/****************************Common****************************/
+/**************************************************************/
+
 ////////////////////////////////////////////////////////////////
 //	Description:It reads the file with the information to be
 //				transmitted and stores the characters in
@@ -27,14 +31,6 @@ void PrintList(list<char> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<string> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<7>> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
 void PrintList(list<bitset<8>> l);
 /////////////////////
 ////Auxiliary method for printing list
@@ -43,17 +39,43 @@ void PrintList(list<bitset<12>> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<HammingFrame> l);
+void PrintList(list<TransmissionError> l);
+
+/**************************************************************/
+/*****************************CRC******************************/
+/**************************************************************/
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
 void PrintList(list<CRCFrame> l);
+
+////////////////////////////////////////////////////////////////
+//	Description:Converts the frame into a string
+//
+//	**CRC Overload
+//	Arguments:	[in]CRCFrame: frame to be converted
+//
+//	Return:		[out]string: string with the information of the
+//							 frame
+////////////////////////////////////////////////////////////////
+string FrameToString(CRCFrame frame);
+
+/**************************************************************/
+/***************************Hamming****************************/
+/**************************************************************/
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<TransmissionError> l);
-/////hamming
+void PrintList(list<HammingFrame> l);
+
+////////////////////////////////////////////////////////////////
+//	Description:Converts the frame into a string
+//
+//	**Hamming Overload
+//	Arguments:	[in]HammingFrame: frame to be converted
+//
+//	Return:		[out]string: string with the information of the
+//							 frame
+////////////////////////////////////////////////////////////////
 string FrameToString(HammingFrame frame);
-/////crc
-string FrameToString(CRCFrame frame);
 
