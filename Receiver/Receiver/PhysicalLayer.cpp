@@ -25,6 +25,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 void ReceiveHammingMessage()
 {
+	list<char> convertedMessage;
+
    //Startup
 	WSAData wsaData;
 	int		sizeOfAddr;
@@ -106,13 +108,13 @@ void ReceiveHammingMessage()
 				if (IsHammingValid(FrameWithHamming, framesReceived))
 				{
 
-					list<char> convertedMessage;
+					list<char> convertedFrame;
 					list<bitset<8>> deFramedData;
 					deFramedData = DeFrame(FrameWithHamming);
-					convertedMessage = ConvertBinaryMessage(deFramedData);
+					convertedFrame = ConvertBinaryMessage(deFramedData);
 
-					//print message
-					PrintList(convertedMessage);
+					for (list<char>::iterator it = convertedFrame.begin(); it != convertedFrame.end(); it++)
+						convertedMessage.push_back(*it);
 
 					//send confirmation
 					send(newConnection, accepted, sizeof(accepted), NULL);
@@ -124,6 +126,9 @@ void ReceiveHammingMessage()
 			}
 		}
 	}
+	//print message
+	cout << "Received Message:" << endl;
+	PrintList(convertedMessage);
 	cout << endl;
 }
 
@@ -179,7 +184,7 @@ void ReceiveCRCMessage()
 		{
 			recv(newConnection, M, sizeof(M), NULL); //Receive Message
 
-													 //Check if done receiving
+			//Check if done receiving
 			int matchCount = 0;
 			for (list<char>::iterator it = finalMessage.begin(); it != finalMessage.end(); it++)
 			{
@@ -334,11 +339,11 @@ bool IsHammingValid(list<bitset<12>> &binaryCharacters, int framesReceived)
 			hammingCheckResults = CheckHammingParity(*it);
 			if (!hammingCheckResults.isHammingCorrect)
 			{
-				cout << "----------Character Couldn't be Fixed, Requesting Resend---------" << endl;
+				cout << "----------Character Couldn't be Fixed, Requesting Resend----------" << endl;
 				return false;
 			}
 			else
-				cout << "-------------------------Fixed Character-------------------------" << endl;
+				cout << "-------------------------Fixed Character--------------------------" << endl;
 		}
 		charLocation++;
 	}

@@ -38,7 +38,7 @@ struct Message
 	list<CRCFrame> CRCFrames;
 };
 
-struct transmissionError
+struct TransmissionError
 {
 	int frameLocation;
 	int charLocation;
@@ -102,10 +102,10 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors);   /////////////////
 //									Default value: 0.
 //
 ////////////////////////////////////////////////////////////////     ///////////hamming overload
-list<transmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int numberOfBitsToChange);
+list<TransmissionError> GenerateTransmissionError(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors, int *numberOfBitsToChange);
 
 //////////////////////////////crc overload
-list<transmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors, int numberOfBitsToChange);
+list<TransmissionError> GenerateTransmissionError(list<CRCFrame> frames, list<CRCFrame> &framesWithErrors, int numberOfBitsToChange);
 
 void CopyDataForErrorGeneration(list<HammingFrame> frames, list<HammingFrame> &framesWithErrors);
 
@@ -119,3 +119,5 @@ bitset<12> CalculateHammingCode(bitset<8> byteOfData);
 void CalculateCRC(CRCFrame &frame);
 
 list<bool> PerformXORWithCRCANSI(list<bool> l, bitset<17> b2);
+
+int MaxErrorNum(list<HammingFrame> frames);

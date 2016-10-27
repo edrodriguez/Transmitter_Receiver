@@ -115,13 +115,13 @@ void PrintList(list<CRCFrame> l)
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<transmissionError> l)
+void PrintList(list<TransmissionError> l)
 {
-	cout << "--------------------" << l.size() << " Errors Introduced--------------------" << endl;
+	cout << "*" << l.size() << " Errors Introduced" << endl;
 
-	for (list<transmissionError>::iterator it = l.begin(); it != l.end(); it++)
+	for (list<TransmissionError>::iterator it = l.begin(); it != l.end(); it++)
 	{
-		cout << "*Location of Error:" << endl;
+		cout << "**Location of Error:" << endl;
 		cout << "\t-Frame: " << it->frameLocation << endl;;
 		cout << "\t-Character: " << it->charLocation << endl;;
 		cout << "\t-Bit: " << it->bitLocation << endl;;
