@@ -1,0 +1,47 @@
+////////////////////////////////////////////////////////////////
+//	Description:Reverses a CRC Frame
+//
+//	Arguments:	[in/out]CRCFrame&: Frame to be reversed
+////////////////////////////////////////////////////////////////
+void ReverseChars(CRCFrame &frame)
+{
+	bitset<8> temp;
+	//Reverse Syn Char
+	for (size_t i = 0; i < frame.synChar1.size(); i++)
+	{
+		temp[frame.synChar1.size() - 1 - i] = frame.synChar1[i];
+	}
+	frame.synChar1 = temp;
+
+	//Reverse Syn Char
+	for (size_t i = 0; i < frame.synChar2.size(); i++)
+	{
+		temp[frame.synChar2.size() - 1 - i] = frame.synChar2[i];
+	}
+	frame.synChar2 = temp;
+
+	//Reverse Control Char
+	for (size_t i = 0; i < frame.controlChar.size(); i++)
+	{
+		temp[frame.controlChar.size() - 1 - i] = frame.controlChar[i];
+	}
+	frame.controlChar = temp;
+
+	//Reverse Data
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	{
+		for (size_t i = 0; i < it->size(); i++)
+		{
+			temp[it->size() - 1 - i];
+		}
+		*it = temp;
+	}
+
+	//Reverse Control Char
+	list<bool> temp1;
+	for (list<bool>::iterator it = frame.CRCCode.begin(); it != frame.CRCCode.end(); it++)
+	{
+		temp1.push_front(*it);
+	}
+	frame.CRCCode = temp1;
+}

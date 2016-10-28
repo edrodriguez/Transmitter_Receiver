@@ -6,16 +6,15 @@
 void RunPhysicalLayerTests()
 {
 	cout << "Running Physical Layer Tests:" << endl;
-	//ConvertToBinary_InputA_Returns1000001();
-	//ConvertToBinary_Inputa_Returns1100001();
-	//ConvertToBinary_Input0_Returns0110000();
-	//ConvertToBinary_Input$_Returns0100100();
-	//IsOddParity_Input1000001_ReturnFalse();
-	//IsOddParity_Input1100001_ReturnTrue();
+	ConvertToBinary_InputA_Returns01000001();
+	ConvertToBinary_Inputa_Returns01100001();
+	ConvertToBinary_Input0_Returns00110000();
+	ConvertToBinary_Input$_Returns00100100();
+	CalculateCRC_Input01000001_Return0000000110000110();
+	CalculateCRC_InputFullFrameWith01000001Data_Returns0011111010111000();
 	CalculateHammingCode_Input00000000_Return000000000000();
 	CalculateHammingCode_Input10010001_Return001000110001();
 	CalculateHammingCode_Input11111111_Return111011101111();
-	CalculateCRC_Input0000000_Return0000001111000000();
 }
 
 void ConvertToBinary_InputA_Returns01000001()
@@ -74,6 +73,42 @@ void ConvertToBinary_Input$_Returns00100100()
 		std::cout << "Test ConvertToBinary_Input$_Returns00100100 FAILED" << endl;
 }
 
+void CalculateCRC_Input01000001_Return0000000110000110()
+{
+	CRCFrame input;
+	input.data.push_back(bitset<8>("01000001"));
+	list<bool> expectedOutput{ 0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0 };
+
+	CalculateCRC(input);
+
+	if (input.CRCCode == expectedOutput)
+		std::cout << "Test CalculateCRC_Input01000001_Return0000000110000110 PASSED" << endl;
+	else
+		std::cout << "Test CalculateCRC_Input01000001_Return0000000110000110 FAILED" << endl;
+}
+
+void CalculateCRC_InputFullFrameWith01000001Data_Returns0011111010111000()
+{
+	CRCFrame input;
+	input.synChar1[3] = 1;
+	input.synChar1[5] = 1;
+	input.synChar1[6] = 1;
+	input.synChar2[3] = 1;
+	input.synChar2[5] = 1;
+	input.synChar2[6] = 1;
+	input.controlChar[0] = 1;
+	input.data.push_back(bitset<8>("01000001"));
+	list<bool> expectedOutput{ 0,0,1,1,1,1,1,0,1,0,1,1,1,0,0,0 };
+
+	CalculateCRC(input);
+
+	if (input.CRCCode == expectedOutput)
+		std::cout << "Test CalculateCRC_InputFullFrameWith01000001Data_Returns0011111010111000 PASSED" << endl;
+	else
+		std::cout << "Test CalculateCRC_InputFullFrameWith01000001Data_Returns0011111010111000 FAILED" << endl;
+}
+
+
 void CalculateHammingCode_Input00000000_Return000000000000()
 {
 	bitset<8> input("00000000");
@@ -114,18 +149,4 @@ void CalculateHammingCode_Input11111111_Return111011101111()
 		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 PASSED" << endl;
 	else
 		std::cout << "Test CalculateHammingCode_Input11111111_Return111011101111 FAILED" << endl;
-}
-
-void CalculateCRC_Input0000000_Return0000001111000000()
-{
-	CRCFrame input;
-	input.data.push_back(bitset<8>("10100000"));
-	list<bool> expectedOutput{ 0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0 };
-
-	CalculateCRC(input);
-
-	if (input.CRCCode == expectedOutput)
-		std::cout << "Test CalculateCRC_Input0000000_Return0000001111000000 PASSED" << endl;
-	else
-		std::cout << "Test CalculateCRC_Input0000000_Return0000001111000000 FAILED" << endl;
 }

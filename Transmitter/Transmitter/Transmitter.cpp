@@ -75,7 +75,6 @@ int main(int argc, char* argv[])
 				cout << "---------------------Frames With CRC---------------------" << endl;
 				PrintList(CRCFrames);
 
-				//Reverse characters
 				TransmitFrames(CRCFrames, numOfErrors);
 			}
 			else if (mode == "-hamming")

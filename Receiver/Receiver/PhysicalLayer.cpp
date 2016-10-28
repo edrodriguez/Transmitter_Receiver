@@ -98,7 +98,7 @@ void ReceiveCRCMessage()
 		{
 			recv(newConnection, M, sizeof(M), NULL); //Receive Message
 
-													 //Check if done receiving
+			//Check if done receiving
 			int matchCount = 0;
 			for (list<char>::iterator it = finalMessage.begin(); it != finalMessage.end(); it++)
 			{
@@ -121,6 +121,7 @@ void ReceiveCRCMessage()
 					else
 						message.push_back(M[i]);
 				}
+
 				//convert message into a string
 				string messageString;
 				for (list<char>::iterator it = message.begin(); it != message.end(); it++)

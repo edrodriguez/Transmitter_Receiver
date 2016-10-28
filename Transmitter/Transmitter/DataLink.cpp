@@ -25,7 +25,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 bitset<8> IncludeSynChar()
 {
-	const string ACII_22 = "0010110";
+	const string ACII_22 = "00010110";
 	bitset<8> synChar(ACII_22);
 
 	return synChar;
