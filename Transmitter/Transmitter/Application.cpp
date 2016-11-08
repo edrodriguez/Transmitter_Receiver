@@ -72,73 +72,6 @@ void PrintList(list<bitset<12>> l)
 		cout << *it << ' ';
 	cout << endl;
 }
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<TransmissionError> l)
-{
-	cout << "*" << l.size() << " Errors Introduced" << endl;
-
-	for (list<TransmissionError>::iterator it = l.begin(); it != l.end(); it++)
-	{
-		cout << "**Location of Error:" << endl;
-		cout << "\t-Frame: " << it->frameLocation << endl;;
-		cout << "\t-Character: " << it->charLocation << endl;;
-		cout << "\t-Bit: " << it->bitLocation << endl;;
-	}
-	cout << endl;
-}
-
-/**************************************************************/
-/*****************************CRC******************************/
-/**************************************************************/
-
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<CRCFrame> l)
-{
-	for (list<CRCFrame>::iterator it = l.begin(); it != l.end(); it++)
-	{
-		cout << it->synChar1 << ' ' << it->synChar2 << ' ' << it->controlChar << ' ';
-		PrintList(it->data);
-		cout << ' ';
-		for (list<bool>::iterator i = it->CRCCode.begin(); i != it->CRCCode.end(); i++)
-			cout << *i;
-	}
-	cout << endl;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts the frame into a string
-//
-//	**CRC Overload
-//	Arguments:	[in]CRCFrame: frame to be converted
-//
-//	Return:		[out]string: string with the information of the
-//							 frame
-////////////////////////////////////////////////////////////////
-string FrameToString(CRCFrame frame)
-{
-	string frameString = frame.synChar1.to_string() + frame.synChar2.to_string() +
-		frame.controlChar.to_string();
-
-	string dataString = "";
-
-	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
-		dataString.append(it->to_string());
-
-	frameString.append(dataString);
-
-	for (list<bool>::iterator it = frame.CRCCode.begin(); it != frame.CRCCode.end(); it++)
-		frameString.append(to_string(*it));
-
-	return frameString;
-}
-
-/**************************************************************/
-/***************************Hamming****************************/
-/**************************************************************/
 
 /////////////////////
 ////Auxiliary method for printing list
@@ -153,28 +86,4 @@ void PrintList(list<Frame> l)
 	}
 	
 	cout << endl;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts the frame into a string
-//
-//	**Hamming Overload
-//	Arguments:	[in]HammingFrame: frame to be converted
-//
-//	Return:		[out]string: string with the information of the
-//							 frame
-////////////////////////////////////////////////////////////////
-string FrameToString(HammingFrame frame)
-{
-	string frameString = frame.synChar1.to_string() + frame.synChar2.to_string() +
-		frame.controlChar.to_string();
-
-	string dataString = "";
-
-	for (list<bitset<12>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
-		dataString.append(it->to_string());
-
-	frameString.append(dataString);
-
-	return frameString;
 }

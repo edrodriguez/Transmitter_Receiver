@@ -39,43 +39,5 @@ void PrintList(list<bitset<12>> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<TransmissionError> l);
-
-/**************************************************************/
-/*****************************CRC******************************/
-/**************************************************************/
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<CRCFrame> l);
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts the frame into a string
-//
-//	**CRC Overload
-//	Arguments:	[in]CRCFrame: frame to be converted
-//
-//	Return:		[out]string: string with the information of the
-//							 frame
-////////////////////////////////////////////////////////////////
-string FrameToString(CRCFrame frame);
-
-/**************************************************************/
-/***************************Hamming****************************/
-/**************************************************************/
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
 void PrintList(list<Frame> l);
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts the frame into a string
-//
-//	**Hamming Overload
-//	Arguments:	[in]HammingFrame: frame to be converted
-//
-//	Return:		[out]string: string with the information of the
-//							 frame
-////////////////////////////////////////////////////////////////
-string FrameToString(HammingFrame frame);
 
