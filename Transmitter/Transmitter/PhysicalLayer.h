@@ -91,3 +91,5 @@ bool IsOddParity(bitset<7> binaryChar);
 //
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<Frame> frames);
+
+list<char> BipolarAMI(Frame frame);

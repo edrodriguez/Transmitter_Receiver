@@ -15,8 +15,6 @@
 #include <string>
 #include <bitset>
 #include <list>
-#include <random> 
-#include <array>
 
 using namespace std;
 
@@ -146,16 +144,20 @@ void TransmitFrames(list<Frame> frames)
 
 	cout << "Sending " << frames.size() << " Frames: " << endl;
 
-	for (list<Frame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
+	for (list<Frame>::iterator it = frames.begin(); it != frames.end(); it++)
 	{
-		string  frame;
+		list<char>  frame;
 
-		////////////////////DO HDB3
+		//Perform Bipolar AMI
+		frame = BipolarAMI(*it);
+		//Perform HDB3
+
+		//Copy into char array for transmission
 
 
 		//frame = FrameToString(*dataIt);
-		frame.copy(transmittedMessage, frame.length(), 0);
-		transmittedMessage[frame.length()] = NULL;
+		//frame.copy(transmittedMessage, frame.length(), 0);
+		//transmittedMessage[frame.length()] = NULL;
 		send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 
 		int retryCount = 0;
@@ -181,4 +183,92 @@ void TransmitFrames(list<Frame> frames)
 		
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
+}
+
+list<char> BipolarAMI(Frame frame)
+{
+	list<char> bipolarAMI;
+	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
+
+	//transform SynChar 1
+	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
+		if (frame.synChar1[i])
+		{
+			if (lastPulse)
+			{
+				bipolarAMI.push_back('-');
+				lastPulse = 0;
+			}
+			else
+			{
+				bipolarAMI.push_back('+');
+				lastPulse = 1;
+			}
+		}
+		else
+			bipolarAMI.push_back('0');
+	}
+
+	//transform synChar 2
+	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
+		if (frame.synChar2[i])
+		{
+			if (lastPulse)
+			{
+				bipolarAMI.push_back('-');
+				lastPulse = 0;
+			}
+			else
+			{
+				bipolarAMI.push_back('+');
+				lastPulse = 1;
+			}
+		}
+		else
+			bipolarAMI.push_back('0');
+	}
+
+	//transform controlChar
+	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
+		if (frame.controlChar[i])
+		{
+			if (lastPulse)
+			{
+				bipolarAMI.push_back('-');
+				lastPulse = 0;
+			}
+			else
+			{
+				bipolarAMI.push_back('+');
+				lastPulse = 1;
+			}
+		}
+		else
+			bipolarAMI.push_back('0');
+	}
+
+	//transform data
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	{
+		//transform data char
+		for (size_t i = it->size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
+			if ((*it)[i])
+			{
+				if (lastPulse)
+				{
+					bipolarAMI.push_back('-');
+					lastPulse = 0;
+				}
+				else
+				{
+					bipolarAMI.push_back('+');
+					lastPulse = 1;
+				}
+			}
+			else
+				bipolarAMI.push_back('0');
+		}
+	}
+
+	return bipolarAMI;
 }
