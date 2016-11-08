@@ -18,54 +18,66 @@ using namespace std;
 /**************************************************************/
 /***********************Structs for Data***********************/
 /**************************************************************/
-struct CRCFrame
+
+struct Frame
 {
 	bitset<8> synChar1;
 	bitset<8> synChar2;
 	bitset<8> controlChar;
 	list<bitset<8>> data;
-	list<bool> CRCCode;
-};
-
-struct HammingFrame
-{
-	bitset<12> synChar1;
-	bitset<12> synChar2;
-	bitset<12> controlChar;
-	list<bitset<12>> data;
-};
-
-struct TransmissionError
-{
-	int frameLocation;
-	int charLocation;
-	int bitLocation;
 };
 
 /**************************************************************/
 /****************************Common****************************/
 /**************************************************************/
 
-////////////////////////////////////////////////////////////////
-//	Description: converts a list of characters into a list of
-//				 bitsets containing an 8 bit binary representation
-//				 of a character and a parity bit
-//
-//	Arguments:	[in]list<char>: list of characters
-//
-//	Return:		[out]list<bitset<8>>:list of bitsets
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////// 
+//  Description: converts a list of characters into a list of 
+//         bitsets containing a 7 bit binary representation 
+//         of a character and a parity bit 
+// 
+//  Arguments:  [in]list<char>: list of characters 
+// 
+//  Return:    [out]list<bitset<8>>:list of bitsets. Each bitset 
+//                   made up of 7 binary bits 
+//                   representing a character 
+//                   and a parity bit 
+//////////////////////////////////////////////////////////////// 
 list<bitset<8>> ConvertTextForTransmission(list<char> charList);
 
 ////////////////////////////////////////////////////////////////
-//	Description:Converts a character into an 8 bit binary bitset
+//	Description:Converts a character into an 7 bit binary bitset
 //
 //	Arguments:	[in]char: character to be converted
 //
-//	Return:		[out]bitset<8>: binary code for the char stored
+//	Return:		[out]bitset<7>: binary code for the char stored
 //								in a 8 bit bitset
 ////////////////////////////////////////////////////////////////
-bitset<8> ConvertToBinary(char C);
+bitset<7> ConvertToBinary(char C);
+
+//////////////////////////////////////////////////////////////// 
+//  Description: appends a binary bit to the end of a 7 bit 
+//         binary code representing a char 
+// 
+//  Arguments:  [in]bitset<7>: char represented in binary 
+// 
+//  Return:    [out]bitset<8>: bitset including the 7 bit 
+//                representation of the char  
+//                and the parity bit 
+//////////////////////////////////////////////////////////////// 
+bitset<8> IncludeParityBit(bitset<7> binaryChar);
+
+//////////////////////////////////////////////////////////////// 
+//  Description:Calculates whether the input binary character 
+//        string has even or odd parity  
+// 
+//  Arguments:  [in]bitset<7>: char represented in binary 
+// 
+//  Return:    [out]bool: indicating if the parity is even or odd 
+//  Ret Value:  true if odd parity, false if even parity 
+//////////////////////////////////////////////////////////////// 
+bool IsOddParity(bitset<7> binaryChar);
+
 
 /**************************************************************/
 /*****************************CRC******************************/

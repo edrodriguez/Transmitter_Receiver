@@ -25,10 +25,12 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 bitset<8> IncludeSynChar()
 {
-	const string ACII_22 = "00010110";
-	bitset<8> synChar(ACII_22);
+	const string ACII_22 = "0010110";
+	bitset<7> synChar(ACII_22);
 
-	return synChar;
+	bitset<8> synCharWithParity = IncludeParityBit(synChar);
+
+	return synCharWithParity;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -84,9 +86,11 @@ bitset<8> IncludeControlChar(list<bitset<8>> block)
 {
 	int sizeOfBlock = CountCharsInBlock(block);
 
-	bitset<8> controlChar(sizeOfBlock);
+	bitset<7> controlChar(sizeOfBlock);
 
-	return controlChar;
+	bitset<8> controlWithParity = IncludeParityBit(controlChar);
+
+	return controlWithParity;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -105,47 +109,6 @@ int CountCharsInBlock(list<bitset<8>> block)
 	return numChars;
 }
 
-/**************************************************************/
-/*****************************CRC******************************/
-/**************************************************************/
-
-////////////////////////////////////////////////////////////////
-//	Description:Generates a list a frame with each entry
-//				containing a CRCFrame representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message), up to 64 information characters and
-//				a CRC code at the end for error detection
-//
-//	**CRC Overload
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
-//									in binary bitsets
-//				[out]list<CRCFrame>:list of CRCFrames containing
-//								  all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frames)
-{
-	list<list<bitset<8>>> blocks;
-
-	blocks = SeparateInBlocks(&data);
-
-	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
-	{
-		CRCFrame frame;
-		frame.synChar1 = IncludeSynChar();
-		frame.synChar2 = IncludeSynChar();
-		frame.controlChar = IncludeControlChar(*it);
-		frame.data = *it;
-		CalculateCRC(frame);
-		frames.push_back(frame);
-	}
-}
-
-
-/**************************************************************/
-/***************************Hamming****************************/
-/**************************************************************/
-
 ////////////////////////////////////////////////////////////////
 //	Description:Generates a list a frame with each entry
 //				containing a CRCFrame representing a message. Each
@@ -156,12 +119,12 @@ void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frames)
 //				hamming parity bits
 //
 //	**Hamming Overload
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed				////////////////
 //									in binary bitsets
 //				[out]list<HammingFrrame>:list of CRCFrames containing
 //								         all the framed messages
 ////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frames)
+void FrameMessage(list<bitset<8>> data, list<Frame> &frames)
 {
 	list<list<bitset<8>>> blocks;
 
@@ -169,11 +132,11 @@ void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frames)
 
 	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
 	{
-		HammingFrame frame;
-		frame.synChar1 = CalculateHammingCode(IncludeSynChar());
-		frame.synChar2 = CalculateHammingCode(IncludeSynChar());
-		frame.controlChar = CalculateHammingCode(IncludeControlChar(*it));
-		frame.data = GenerateHammingForData(*it);
+		Frame frame;
+		frame.synChar1 = IncludeSynChar();
+		frame.synChar2 = IncludeSynChar();
+		frame.controlChar = IncludeControlChar(*it);
+		frame.data = *it;
 		frames.push_back(frame);
 	}
 }

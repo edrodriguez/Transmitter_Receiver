@@ -61,30 +61,6 @@ bitset<8> IncludeControlChar(list<bitset<8>> block);
 ////////////////////////////////////////////////////////////////
 int CountCharsInBlock(list<bitset<8>> block);
 
-/**************************************************************/
-/*****************************CRC******************************/
-/**************************************************************/
-
-////////////////////////////////////////////////////////////////
-//	Description:Generates a list a frame with each entry
-//				containing a CRCFrame representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message), up to 64 information characters and
-//				a CRC code at the end for error detection
-//
-//	**CRC Overload
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
-//									in binary bitsets
-//				[out]list<CRCFrame>:list of CRCFrames containing
-//								  all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frame);
-
-/**************************************************************/
-/***************************Hamming****************************/
-/**************************************************************/
-
 ////////////////////////////////////////////////////////////////
 //	Description:Generates a list a frame with each entry
 //				containing a CRCFrame representing a message. Each
@@ -97,7 +73,7 @@ void FrameMessage(list<bitset<8>> data, list<CRCFrame> &frame);
 //	**Hamming Overload
 //	Arguments:	[in]list<bitset<8>>:list of characters expressed
 //									in binary bitsets
-//				[out]list<HammingFrrame>:list of CRCFrames containing
+//				[out]list<HammingFrrame>:list of CRCFrames containing			/////////////
 //								         all the framed messages
 ////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<HammingFrame> &frame);
+void FrameMessage(list<bitset<8>> data, list<Frame> &frame);

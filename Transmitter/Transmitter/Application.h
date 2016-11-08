@@ -66,7 +66,7 @@ string FrameToString(CRCFrame frame);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<HammingFrame> l);
+void PrintList(list<Frame> l);
 
 ////////////////////////////////////////////////////////////////
 //	Description:Converts the frame into a string

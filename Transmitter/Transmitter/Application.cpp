@@ -143,10 +143,11 @@ string FrameToString(CRCFrame frame)
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<HammingFrame> l)
+void PrintList(list<Frame> l)
 {
-	for (list<HammingFrame>::iterator it = l.begin(); it != l.end(); it++)
+	for (list<Frame>::iterator it = l.begin(); it != l.end(); it++)
 	{
+		cout << "Frame: ";
 		cout << it->synChar1 << ' ' << it->synChar2 << ' ' << it->controlChar << ' ';
 		PrintList(it->data);
 	}

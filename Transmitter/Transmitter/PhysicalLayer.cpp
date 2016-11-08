@@ -24,25 +24,26 @@ using namespace std;
 /****************************Common****************************/
 /**************************************************************/
 
-////////////////////////////////////////////////////////////////
-//	Description: converts a list of characters into a list of
-//				 bitsets containing a 7 bit binary representation
-//				 of a character and a parity bit
-//
-//	Arguments:	[in]list<char>: list of characters
-//
-//	Return:		[out]list<bitset<8>>:list of bitsets. Each bitset
-//									 made up of 7 binary bits
-//									 representing a character
-//									 and a parity bit
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////// 
+//  Description: converts a list of characters into a list of 
+//         bitsets containing a 7 bit binary representation 
+//         of a character and a parity bit 
+// 
+//  Arguments:  [in]list<char>: list of characters 
+// 
+//  Return:    [out]list<bitset<8>>:list of bitsets. Each bitset 
+//                   made up of 7 binary bits 
+//                   representing a character 
+//                   and a parity bit 
+//////////////////////////////////////////////////////////////// 
 list<bitset<8>> ConvertTextForTransmission(list<char> charList)
 {
 	list<bitset<8>> binaryInfo;
 
 	//convert caracters to binary
 	for (list<char>::iterator it = charList.begin(); it != charList.end(); it++)
-		binaryInfo.push_back(ConvertToBinary(*it));
+		binaryInfo.push_back(IncludeParityBit(ConvertToBinary(*it)));
+
 
 	return binaryInfo;
 }
@@ -55,85 +56,48 @@ list<bitset<8>> ConvertTextForTransmission(list<char> charList)
 //	Return:		[out]bitset<7>: binary code for the char stored
 //								in a 7 bit bitset
 ////////////////////////////////////////////////////////////////
-bitset<8> ConvertToBinary(char C)
+bitset<7> ConvertToBinary(char C)
 {
-	return bitset<8>(C);
+	return bitset<7>(C);
 }
 
-/**************************************************************/
-/*****************************CRC******************************/
-/**************************************************************/
-
-////////////////////////////////////////////////////////////////
-//	Description:Calculates the CRC code for the frame using a
-//				shift register simulation approach
-//
-//	Arguments:	[in]CRCFrame&: Frame to be used for calculation
-//
-////////////////////////////////////////////////////////////////
-void CalculateCRC(CRCFrame &frame)
+//////////////////////////////////////////////////////////////// 
+//  Description: appends a binary bit to the end of a 7 bit 
+//         binary code representing a char 
+// 
+//  Arguments:  [in]bitset<7>: char represented in binary 
+// 
+//  Return:    [out]bitset<8>: bitset including the 7 bit 
+//                representation of the char  
+//                and the parity bit 
+//////////////////////////////////////////////////////////////// 
+bitset<8> IncludeParityBit(bitset<7> binaryChar)
 {
-	//Initialize CRC as 0s
-	array<bool, 16> CRC;
-	for (size_t i = 0; i< CRC.size(); ++i)
-		CRC[i] = 0;
+	bitset<8> binaryCharWithParity;
 
-	//Copy data from the frame into D
-	list<bool> D;
-	for (list<bitset<8>>::reverse_iterator it = frame.data.rbegin(); it != frame.data.rend(); it++)
-	{
-		for (size_t i = 0; i < it->size(); i++)
-		{
-			D.push_front((*it)[i]);
-		}
-	}
+	binaryCharWithParity[binaryCharWithParity.size() - 1] = IsOddParity(binaryChar);
 
-	for (size_t i = 0; i < frame.controlChar.size(); i++)
-		D.push_front(frame.controlChar[i]);
+	for (size_t i = 0; i < binaryChar.size(); i++)
+		binaryCharWithParity[i] = binaryChar[i];
 
-	for (size_t i = 0; i < frame.synChar2.size(); i++)
-		D.push_front(frame.synChar2[i]);
+	return binaryCharWithParity;
+}
 
-	for (size_t i = 0; i < frame.synChar1.size(); i++)
-		D.push_front(frame.synChar1[i]);
-
-	//Simulate shift registers
-	bool nextBit;
-	for (list<bool>::iterator it = D.begin(); it != D.end(); it++)
-	{
-		//Get Next Bit
-		if (*it == 1)
-			nextBit = 1;
-		else
-			nextBit = 0;
-
-		//XOR next bit with MSB of registers
-		nextBit = nextBit ^ CRC[15];
-
-		//Include XOR gates in order to create the polynomial X16 + X15 + X2 + 1
-		CRC[15] = CRC[14] ^ nextBit;
-		CRC[14] = CRC[13];
-		CRC[13] = CRC[12];
-		CRC[12] = CRC[11];
-		CRC[11] = CRC[10];
-		CRC[10] = CRC[9];
-		CRC[9] = CRC[8];
-		CRC[8] = CRC[7];
-		CRC[7] = CRC[6];
-		CRC[6] = CRC[5];
-		CRC[5] = CRC[4];
-		CRC[4] = CRC[3];
-		CRC[3] = CRC[2];
-		CRC[2] = CRC[1] ^ nextBit;
-		CRC[1] = CRC[0];
-		CRC[0] = nextBit;
-	}
-
-	list<bool> outResult;
-	for (size_t i = 0; i < CRC.size(); i++)
-		outResult.push_front(CRC[i]);
-
-	frame.CRCCode = outResult;
+//////////////////////////////////////////////////////////////// 
+//  Description:Calculates whether the input binary character 
+//        string has even or odd parity  
+// 
+//  Arguments:  [in]bitset<7>: char represented in binary 
+// 
+//  Return:    [out]bool: indicating if the parity is even or odd 
+//  Ret Value:  true if odd parity, false if even parity 
+//////////////////////////////////////////////////////////////// 
+bool IsOddParity(bitset<7> binaryChar)
+{
+	if (binaryChar.count() % 2 == 0)
+		return false; //contains an even number of 1 bits 
+	else
+		return true; //contains an odd number of 1 bits 
 }
 
 ////////////////////////////////////////////////////////////////
@@ -143,18 +107,16 @@ void CalculateCRC(CRCFrame &frame)
 //
 //	**CRC Overload
 //	Arguments:	[in]list<CRC>: list containing all the
-//							   frames to be transmitted
+//							   frames to be transmitted				/////////////////////////
 //				[in]int:number of errors to be introduced during
 //					    transmission
 //
 ////////////////////////////////////////////////////////////////
-void TransmitFrames(list<CRCFrame> frames, int numOfErrors)
+void TransmitFrames(list<Frame> frames)
 {
-	list<TransmissionError> errorsIntroduced;
-	list<CRCFrame> framesWithErrors;
-	char transmittedMessage[553];
+	char transmittedMessage[537];
 	char accepted[1] = { '0' };
-	char finalMessage[553] = "Done";
+	char finalMessage[537] = "Done";
 
 	//Connect Socket
 	WSAData wsaData;
@@ -182,86 +144,38 @@ void TransmitFrames(list<CRCFrame> frames, int numOfErrors)
 	//Connected
 	cout << "Connected!" << endl;
 
-	//Generate and send messages with errors
-	if (numOfErrors > 0)
+	cout << "Sending " << frames.size() << " Frames: " << endl;
+
+	for (list<Frame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
 	{
-		cout << "---------------------Generating Errors---------------------" << endl;
-		errorsIntroduced = GenerateTransmissionError(frames, framesWithErrors, numOfErrors);
-		PrintList(errorsIntroduced);
-		PrintList(framesWithErrors);
+		string  frame;
 
-		cout << "Sending " << framesWithErrors.size() << " Frames: " << endl;
+		frame = FrameToString(*dataIt);
+		frame.copy(transmittedMessage, frame.length(), 0);
+		transmittedMessage[frame.length()] = NULL;
+		send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 
-		for (list<CRCFrame>::iterator dataIt = frames.begin(), errorIt = framesWithErrors.begin();
-			dataIt != frames.end() && errorIt != framesWithErrors.end(); dataIt++, errorIt++)
+		int retryCount = 0;
+		do
 		{
-			string errorFrame, realFrame;
+			recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
 
-			errorFrame = FrameToString(*errorIt);
-			errorFrame.copy(transmittedMessage, errorFrame.length(), 0);
-			transmittedMessage[errorFrame.length()] = NULL;
-			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
-
-			int retryCount = 0;
-			do
+			if (accepted[0] == 1)
+				cout << "----------------------Accepted Message---------------------" << endl;
+			else
 			{
-				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
-
-				if (accepted[0] == 1)
-					cout << "--------------------Accepted Message-------------------" << endl;
-				else
-				{
-					retryCount++;
-					cout << "--Message Contained Errors and Could Not Be Corrected--" << endl;
-					cout << "----------------Retransmitting Message-----------------" << endl;
-					realFrame = FrameToString(*dataIt);
-					realFrame.copy(transmittedMessage, realFrame.length(), 0);
-					transmittedMessage[realFrame.length()] = NULL;
-					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
-				}
-			} while (accepted[0] == 0 && retryCount < 5);
-			if (retryCount == 5)
-			{
-				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
-				break;
+				retryCount++;
+				cout << "----Message Contained Errors and Could Not Be Corrected----" << endl;
+				cout << "------------------Retransmitting Message-------------------" << endl;
+				send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 			}
-		}
-	}
-	//Send only messages without errors
-	else
-	{
-		cout << "Sending " << frames.size() << " Frames: " << endl;
-
-		for (list<CRCFrame>::iterator dataIt = frames.begin(); dataIt != frames.end(); dataIt++)
+		} while (accepted[0] == 0 && retryCount < 5);
+		if (retryCount == 5)
 		{
-			string  frame;
-
-			frame = FrameToString(*dataIt);
-			frame.copy(transmittedMessage, frame.length(), 0);
-			transmittedMessage[frame.length()] = NULL;
-			send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
-
-			int retryCount = 0;
-			do
-			{
-				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
-
-				if (accepted[0] == 1)
-					cout << "----------------------Accepted Message---------------------" << endl;
-				else
-				{
-					retryCount++;
-					cout << "----Message Contained Errors and Could Not Be Corrected----" << endl;
-					cout << "------------------Retransmitting Message-------------------" << endl;
-					send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
-				}
-			} while (accepted[0] == 0 && retryCount < 5);
-			if (retryCount == 5)
-			{
-				recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
-				break;
-			}
+			recv(Connection, accepted, sizeof(accepted), NULL); //accept message of approval
+			break;
 		}
+		
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }

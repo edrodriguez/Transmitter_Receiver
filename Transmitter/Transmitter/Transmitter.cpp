@@ -40,19 +40,6 @@ int main(int argc, char* argv[])
 			// normal transmitter function
 			list<char> infoFromFile;
 			list<bitset<8>> binaryData;
-			int numOfErrors = 0;
-
-			//Get number of errors if any
-			if (argv[2] != nullptr)
-			{
-				string errorMode = argv[2];
-				for (size_t i = 0; i < errorMode.size(); i++)
-					errorMode[i] = tolower(errorMode[i]);
-
-				if (errorMode == "-errornum")
-					if (argv[3] != nullptr)
-						numOfErrors = atoi(argv[3]);
-			}
 
 			//Read from File
 			infoFromFile = ReadFile();
@@ -65,33 +52,14 @@ int main(int argc, char* argv[])
 			PrintList(binaryData);
 			cout << endl;
 
-			if (mode == "-crc")
-			{
-				cout << "-------------Transmitter Running in CRC Mode-------------" << endl;
-				list<CRCFrame> CRCFrames;
-				//frame and crc calculation
-				FrameMessage(binaryData, CRCFrames);
+			list<Frame> frames;
+			//frame and crc calculation
+			cout << "---------------------Frames---------------------" << endl;
+			FrameMessage(binaryData, frames);			
+			PrintList(frames);
 
-				cout << "---------------------Frames With CRC---------------------" << endl;
-				PrintList(CRCFrames);
-
-				TransmitFrames(CRCFrames, numOfErrors);
-			}
-			else if (mode == "-hamming")
-			{
-				cout << "------------Transmitter Running in Hamming Mode------------" << endl;
-				list<HammingFrame> HammingFrames;
-				//frame and hamming calculation
-				FrameMessage(binaryData, HammingFrames);
-
-				cout << "--------------------Frames With Hamming--------------------" << endl;
-				PrintList(HammingFrames);
-
-				//Reverse characters
-				TransmitFrames(HammingFrames, numOfErrors);
-			}
-			else
-				cout << "Invalid Mode of Operation" << endl;
+			cout << "----------Transmitter Message Using HDB3 Encoding----------" << endl;
+			TransmitFrames(frames);
 		}
 	}
 	else
