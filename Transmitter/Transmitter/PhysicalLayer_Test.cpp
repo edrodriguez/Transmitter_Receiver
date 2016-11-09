@@ -11,6 +11,8 @@ void RunPhysicalLayerTests()
 	ConvertToBinary_Input0_Returns0110000();
 	ConvertToBinary_Input$_Returns0100100();
 	BipolarAMI_Input1Element10101010_ReturnsP0N0P0N0();
+	BipolarAMI_Input2Element10101010_ReturnsP0N0P0N0P0N0P0N0();
+	HDB3_Input101000000000010_ReturnP0N000NP00P00N0();
 }
 
 void ConvertToBinary_InputA_Returns1000001()
@@ -74,7 +76,7 @@ void BipolarAMI_Input1Element10101010_ReturnsP0N0P0N0()
 	Frame input;
 	bitset<8> testBitset("10101010");
 	input.data.push_back(testBitset);
-	list<char> expectedOutput;// { '+', '0', '-', '0', '+', '0', '-', '0' };
+	list<char> expectedOutput;
 	list<char> actualOutput;
 
 	//fill up expected output
@@ -91,10 +93,63 @@ void BipolarAMI_Input1Element10101010_ReturnsP0N0P0N0()
 	expectedOutput.push_back('-');
 	expectedOutput.push_back('0');
 
-	actualOutput = BipolarAMI(input);
+	actualOutput = PerformBipolarAMIOnFrame(input);
 
 	if (actualOutput == expectedOutput)
 		std::cout << "Test BipolarAMI_Input1Element10101010_ReturnsP0N0P0N0 PASSED" << endl;
 	else
 		std::cout << "Test BipolarAMI_Input1Element10101010_ReturnsP0N0P0N0 FAILED" << endl;
+}
+
+void BipolarAMI_Input2Element10101010_ReturnsP0N0P0N0P0N0P0N0()
+{
+	Frame input;
+	bitset<8> testBitset("10101010");
+	input.data.push_back(testBitset);
+	input.data.push_back(testBitset);
+	list<char> expectedOutput;
+	list<char> actualOutput;
+
+	//fill up expected output
+	for (size_t i = 0; i < 24; i++)
+	{
+		expectedOutput.push_back('0');
+	}
+	expectedOutput.push_back('+');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('-');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('+');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('-');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('+');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('-');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('+');
+	expectedOutput.push_back('0');
+	expectedOutput.push_back('-');
+	expectedOutput.push_back('0');
+
+	actualOutput = PerformBipolarAMIOnFrame(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test BipolarAMI_Input2Element10101010_ReturnsP0N0P0N0P0N0P0N0 PASSED" << endl;
+	else
+		std::cout << "Test BipolarAMI_Input2Element10101010_ReturnsP0N0P0N0P0N0P0N0 FAILED" << endl;
+}
+
+void HDB3_Input101000000000010_ReturnP0N000NP00P00N0()
+{
+	list<char> input = { '+','0','-','0','0','0','0','0','0','0','0','0','0','+','0' };
+	list<char> expectedOutput = { '+','0','-','0','0','0','-','+','0','0','+','0','0','-','0' };
+	list<char> actualOutput;
+
+	actualOutput = HDB3(input);
+
+	if (actualOutput == expectedOutput)
+		std::cout << "Test HDB3_Input101000000000010_ReturnP0N000NP00P00N0 PASSED" << endl;
+	else
+		std::cout << "Test HDB3_Input101000000000010_ReturnP0N000NP00P00N0 FAILED" << endl;
 }

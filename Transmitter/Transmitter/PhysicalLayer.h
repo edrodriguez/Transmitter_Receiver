@@ -92,4 +92,8 @@ bool IsOddParity(bitset<7> binaryChar);
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<Frame> frames);
 
-list<char> BipolarAMI(Frame frame);
+list<char> PerformBipolarAMIOnFrame(Frame frame);
+
+list<char> BipolarAMI(bitset<8> b, bool &lastPulse);
+
+list<char> HDB3(list<char> l);

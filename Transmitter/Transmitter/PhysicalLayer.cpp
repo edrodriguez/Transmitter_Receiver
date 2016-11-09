@@ -149,9 +149,9 @@ void TransmitFrames(list<Frame> frames)
 		list<char>  frame;
 
 		//Perform Bipolar AMI
-		frame = BipolarAMI(*it);
+		frame = PerformBipolarAMIOnFrame(*it);
 		//Perform HDB3
-
+		frame = HDB3(frame);
 		//Copy into char array for transmission
 
 
@@ -185,90 +185,176 @@ void TransmitFrames(list<Frame> frames)
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }
 
-list<char> BipolarAMI(Frame frame)
+list<char> PerformBipolarAMIOnFrame(Frame frame)
 {
 	list<char> bipolarAMI;
 	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
 
 	//transform SynChar 1
-	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
-		if (frame.synChar1[i])
-		{
-			if (lastPulse)
-			{
-				bipolarAMI.push_back('-');
-				lastPulse = 0;
-			}
-			else
-			{
-				bipolarAMI.push_back('+');
-				lastPulse = 1;
-			}
-		}
-		else
-			bipolarAMI.push_back('0');
-	}
+	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar1, lastPulse));
 
 	//transform synChar 2
-	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
-		if (frame.synChar2[i])
-		{
-			if (lastPulse)
-			{
-				bipolarAMI.push_back('-');
-				lastPulse = 0;
-			}
-			else
-			{
-				bipolarAMI.push_back('+');
-				lastPulse = 1;
-			}
-		}
-		else
-			bipolarAMI.push_back('0');
-	}
-
+	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar2, lastPulse));
+	
 	//transform controlChar
-	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
-		if (frame.controlChar[i])
-		{
-			if (lastPulse)
-			{
-				bipolarAMI.push_back('-');
-				lastPulse = 0;
-			}
-			else
-			{
-				bipolarAMI.push_back('+');
-				lastPulse = 1;
-			}
-		}
-		else
-			bipolarAMI.push_back('0');
-	}
+	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.controlChar, lastPulse));
 
 	//transform data
 	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
 	{
 		//transform data char
-		for (size_t i = it->size() - 1; i >= 0 && i < frame.synChar1.size(); i--) {
-			if ((*it)[i])
+		bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(*it, lastPulse));
+	}
+
+	return bipolarAMI;
+}
+
+list<char> BipolarAMI(bitset<8> b, bool &lastPulse)
+{
+	list<char> bipolarAMI;
+
+	for (size_t i = b.size() - 1; i >= 0 && i < b.size(); i--) {
+		if (b[i])
+		{
+			if (lastPulse)
+			{
+				bipolarAMI.push_back('-');
+				lastPulse = 0;
+			}
+			else
+			{
+				bipolarAMI.push_back('+');
+				lastPulse = 1;
+			}
+		}
+		else
+			bipolarAMI.push_back('0');
+	}
+
+	return bipolarAMI;
+}
+
+list<char> HDB3(list<char> frame)
+{
+	list<char> HDB3Frame;
+	int countOfZeros = 0;
+	int countOf1s = 0;
+	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
+
+	while(!frame.empty())
+	{
+		if (!frame.empty() && frame.front() == '+')
+		{
+			countOfZeros = 0;
+			countOf1s++;
+			if (!lastPulse)
+				HDB3Frame.push_back(frame.front());
+			else
+				HDB3Frame.push_back('-');
+			frame.pop_front();
+			lastPulse = 1;
+		}
+		else if (!frame.empty() && frame.front() == '-')
+		{
+			countOfZeros = 0;
+			countOf1s++;
+			if (lastPulse)
+				HDB3Frame.push_back(frame.front());
+			else
+				HDB3Frame.push_back('+');
+			frame.pop_front();
+			lastPulse = 0;
+		}
+		else if (!frame.empty() && frame.front() == '0')
+		{
+			//Found first 0, check if there are 3 more consecutive 0s
+			countOfZeros++;
+			list<char>::iterator it = frame.begin();
+			for (int i = 0; i < 3; i++)
+			{
+				it++;
+				if (it != frame.end() && *it == '0')
+					countOfZeros++;
+				else
+					break;
+			}
+
+			//Use 000V
+			if (countOfZeros == 4 && countOf1s % 2 == 0)
 			{
 				if (lastPulse)
 				{
-					bipolarAMI.push_back('-');
+					countOfZeros = 0;
+					countOf1s++;
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('+');
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					lastPulse = 1;
+				}
+				else
+				{
+					countOfZeros = 0;
+					countOf1s++;
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('-');
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					lastPulse = 0;
+				}
+			}
+			//Use B00V
+			else if (countOfZeros == 4 && countOf1s % 2 != 0)
+			{
+				if (lastPulse)
+				{
+					countOfZeros = 0;
+					countOf1s++;
+					countOf1s++;
+					HDB3Frame.push_back('-');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('-');
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
 					lastPulse = 0;
 				}
 				else
 				{
-					bipolarAMI.push_back('+');
+					countOfZeros = 0;
+					countOf1s++;
+					countOf1s++;
+					HDB3Frame.push_back('+');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('0');
+					HDB3Frame.push_back('+');
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
+					frame.pop_front();
 					lastPulse = 1;
 				}
 			}
 			else
-				bipolarAMI.push_back('0');
+			{
+				while (!frame.empty() && frame.front() == '0')
+				{
+					HDB3Frame.push_back('0');
+					frame.pop_front();
+				}
+				countOfZeros = 0;
+			}
 		}
 	}
-
-	return bipolarAMI;
+	return HDB3Frame;
 }
