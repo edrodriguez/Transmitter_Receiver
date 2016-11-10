@@ -87,3 +87,15 @@ void PrintList(list<Frame> l)
 	
 	cout << endl;
 }
+
+/////////////////////////////////////////////////
+void CopyListForTransmission(list<char> l, char(&arr)[537])
+{
+	int i = 0;
+	while (!l.empty() && i < sizeof(arr) / sizeof(*arr))
+	{
+		arr[i] = l.front();
+		l.pop_front();
+		i++;
+	}
+}

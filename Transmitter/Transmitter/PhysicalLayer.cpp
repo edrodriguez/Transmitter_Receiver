@@ -153,11 +153,9 @@ void TransmitFrames(list<Frame> frames)
 		//Perform HDB3
 		frame = HDB3(frame);
 		//Copy into char array for transmission
+		CopyListForTransmission(frame, transmittedMessage);
 
-
-		//frame = FrameToString(*dataIt);
-		//frame.copy(transmittedMessage, frame.length(), 0);
-		//transmittedMessage[frame.length()] = NULL;
+		transmittedMessage[frame.size()] = NULL;
 		send(Connection, transmittedMessage, sizeof(transmittedMessage), NULL);
 
 		int retryCount = 0;

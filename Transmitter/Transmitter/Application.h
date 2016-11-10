@@ -41,3 +41,6 @@ void PrintList(list<bitset<12>> l);
 ////////////////////
 void PrintList(list<Frame> l);
 
+//////////////////////////////////////////////////////////////////
+void CopyListForTransmission(list<char> l, char (&arr)[537]);
+
