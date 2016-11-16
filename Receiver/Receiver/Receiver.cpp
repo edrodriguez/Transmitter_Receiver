@@ -29,15 +29,9 @@ int main(int argc, const char* argv[])
 			RunPhysicalLayerTests();
 			return 0;
 		}
-		else if (mode == "-crc")
-			ReceiveCRCMessage();
-		else if (mode == "-hamming")
-			ReceiveHammingMessage();
-		else
-			cout << "Invalid Mode of Operation" << endl;
 	}
-	else
-		cout << "Please Indicate a Mode of Operation" << endl;
+	//Normal receiver operation
+	ReceiveMessage();
 
 	return 0;
 }

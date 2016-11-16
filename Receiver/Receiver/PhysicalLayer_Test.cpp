@@ -2,66 +2,38 @@
 #include "PhysicalLayer.h"
 #include <bitset>
 #include <iostream>
+#include <vector>
 
 void RunPhysicalLayerTests()
 {
-	IsCRCValid_Input010000010000000110000110_ReturnTrue();
-	IsCRCValid_Input110000010000000110000110_ReturnFalse();
-	CheckHammingParity_Input100010010001_ReturnTrue();
-	CheckHammingParity_Input110010010001_ReturnFalse();
+	ConvertToBinary_InputP0M000MP00P00M0_Return101000000000010();
+	ConvertToBinary_InputP0M000M0PMP00PMPM00M00_Return1010000011000011000000();
 }
 
-void IsCRCValid_Input010000010000000110000110_ReturnTrue()
+void ConvertToBinary_InputP0M000MP00P00M0_Return101000000000010()
 {
-	list<bool> input{ 0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0 };
-	bool expectedOutput = true;
+	vector<char> input{'+', '0', '-', '0', '0', '0', '-', '+', '0', '0', '+', '0', '0', '-', '0' };
+	list<char> expectedOutput{ '1', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0' };
+	list<char> actualOutput;
 
-	bool actualOutput = IsCRCValid(input);
+	actualOutput = ConvertToBinary(input);
 
 	if (actualOutput == expectedOutput)
-		std::cout << "Test IsCRCValid_Input010000010000000110000110_ReturnTrue PASSED" << endl;
+		std::cout << "Test ConvertToBinary_InputP0M000MP00P00M0_Return101000000000010 PASSED" << endl;
 	else
-		std::cout << "Test IsCRCValid_Input010000010000000110000110_ReturnTrue FAILED" << endl;
+		std::cout << "Test ConvertToBinary_InputP0M000MP00P00M0_Return101000000000010 FAILED" << endl;
 }
 
-void IsCRCValid_Input110000010000000110000110_ReturnFalse()
+void ConvertToBinary_InputP0M000M0PMP00PMPM00M00_Return1010000011000011000000()
 {
-	list<bool> input{ 1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0 };
-	bool expectedOutput = false;
+	vector<char> input       { '+', '0', '-', '0', '0', '0', '-', '0', '+', '-', '+', '0', '0', '+', '-', '+', '-', '0', '0', '-', '0', '0' };
+	list<char> expectedOutput{ '1', '0', '1', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '0', '0' };
+	list<char> actualOutput;
 
-	bool actualOutput = IsCRCValid(input);
+	actualOutput = ConvertToBinary(input);
 
 	if (actualOutput == expectedOutput)
-		std::cout << "Test IsCRCValid_Input110000010000000110000110_ReturnFalse PASSED" << endl;
+		std::cout << "Test ConvertToBinary_InputP0M000M0PMP00PMPM00M00_Return1010000011000011000000 PASSED" << endl;
 	else
-		std::cout << "Test IsCRCValid_Input110000010000000110000110_ReturnFalse FAILED" << endl;
-}
-
-void CheckHammingParity_Input100010010001_ReturnTrue()
-{
-	bitset<12> input("100010010001");
-	HammingErrorDetection expectedOutput, actualOutput;
-
-	expectedOutput.isHammingCorrect = true;
-	actualOutput = CheckHammingParity(input);
-
-	if (actualOutput.isHammingCorrect == expectedOutput.isHammingCorrect)
-		std::cout << "Test CheckHammingParity_Input100010010001_ReturnTrue PASSED" << endl;
-	else
-		std::cout << "Test CheckHammingParity_Input100010010001_ReturnTrue FAILED" << endl;
-}
-
-void CheckHammingParity_Input110010010001_ReturnFalse()
-{
-	bitset<12> input("110010010001");
-	HammingErrorDetection expectedOutput, actualOutput;
-
-	expectedOutput.isHammingCorrect = false;
-	expectedOutput.errorBit = 2;
-	actualOutput = CheckHammingParity(input);
-
-	if (actualOutput.isHammingCorrect == expectedOutput.isHammingCorrect && actualOutput.errorBit == expectedOutput.errorBit)
-		std::cout << "Test CheckHammingParity_Input110010010001_ReturnFalse PASSED" << endl;
-	else
-		std::cout << "Test CheckHammingParity_Input110010010001_ReturnFalse FAILED" << endl;
+		std::cout << "Test ConvertToBinary_InputP0M000M0PMP00PMPM00M00_Return1010000011000011000000 FAILED" << endl;
 }

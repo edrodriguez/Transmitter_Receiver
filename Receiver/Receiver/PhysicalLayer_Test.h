@@ -2,10 +2,6 @@
 
 void RunPhysicalLayerTests();
 
-void IsCRCValid_Input010000010000000110000110_ReturnTrue();
+void ConvertToBinary_InputP0M000MP00P00M0_Return101000000000010();
 
-void IsCRCValid_Input110000010000000110000110_ReturnFalse();
-
-void CheckHammingParity_Input100010010001_ReturnTrue();
-
-void CheckHammingParity_Input110010010001_ReturnFalse();
+void ConvertToBinary_InputP0M000M0PMP00PMPM00M00_Return1010000011000011000000();
