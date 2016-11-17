@@ -18,10 +18,6 @@
 
 using namespace std;
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
-
 //////////////////////////////////////////////////////////////// 
 //  Description: converts a list of characters into a list of 
 //         bitsets containing a 7 bit binary representation 
@@ -148,10 +144,14 @@ void TransmitFrames(list<Frame> frames)
 	{
 		list<char>  frame;
 
+		frame = TurnFrameIntoList(*it);
 		//Perform Bipolar AMI
-		frame = PerformBipolarAMIOnFrame(*it);
+		frame = BipolarAMI(frame,false);
+		//frame = PerformBipolarAMIOnFrame(*it);
 		//Perform HDB3
 		frame = HDB3(frame);
+		cout << "- Encoded Frame:" << endl;
+		PrintList(frame);
 		//Copy into char array for transmission
 		CopyListForTransmission(frame, transmittedMessage);
 
@@ -183,50 +183,56 @@ void TransmitFrames(list<Frame> frames)
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }
 
-list<char> PerformBipolarAMIOnFrame(Frame frame)
+//list<char> PerformBipolarAMIOnFrame(Frame frame)
+//{
+//	list<char> bipolarAMI;
+//	list<char> bipolarAMI;
+//	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
+//
+//	//transform SynChar 1
+//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar1, lastPulse));
+//
+//	//transform synChar 2
+//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar2, lastPulse));
+//	
+//	//transform controlChar
+//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.controlChar, lastPulse));
+//
+//	//transform data
+//	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+//	{
+//		//transform data char
+//		bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(*it, lastPulse));
+//	}
+//
+//	return bipolarAMI;
+//}
+
+list<char> BipolarAMI(list<char> frame, bool lastPulse)
 {
 	list<char> bipolarAMI;
-	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
-
-	//transform SynChar 1
-	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar1, lastPulse));
-
-	//transform synChar 2
-	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar2, lastPulse));
 	
-	//transform controlChar
-	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.controlChar, lastPulse));
-
-	//transform data
-	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
-	{
-		//transform data char
-		bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(*it, lastPulse));
-	}
-
-	return bipolarAMI;
-}
-
-list<char> BipolarAMI(bitset<8> b, bool &lastPulse)
-{
-	list<char> bipolarAMI;
-
-	for (size_t i = b.size() - 1; i >= 0 && i < b.size(); i--) {
-		if (b[i])
+	while(!frame.empty()) {
+		if (frame.front() == '1' || frame.front() == '+' || frame.front() == '-')
 		{
 			if (lastPulse)
 			{
 				bipolarAMI.push_back('-');
 				lastPulse = 0;
+				frame.pop_front();
 			}
 			else
 			{
 				bipolarAMI.push_back('+');
 				lastPulse = 1;
+				frame.pop_front();
 			}
 		}
 		else
+		{
 			bipolarAMI.push_back('0');
+			frame.pop_front();
+		}
 	}
 
 	return bipolarAMI;
@@ -238,6 +244,7 @@ list<char> HDB3(list<char> frame)
 	int countOfZeros = 0;
 	int countOf1s = 0;
 	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
+	int currentIndex = 0;
 
 	while(!frame.empty())
 	{
@@ -293,6 +300,9 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					frame.pop_front();
 					lastPulse = 1;
+					//next one has same polarity, need to fix
+					if (frame.front() == '+')
+						frame = BipolarAMI(frame,true);
 				}
 				else
 				{
@@ -307,6 +317,9 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					frame.pop_front();
 					lastPulse = 0;
+					//next one has same polarity, need to fix
+					if (frame.front() == '-')
+						frame = BipolarAMI(frame, true);
 				}
 			}
 			//Use B00V
@@ -326,6 +339,9 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					frame.pop_front();
 					lastPulse = 0;
+					//next one has same polarity, need to fix
+					if (frame.front() == '-')
+						frame = BipolarAMI(frame, true);
 				}
 				else
 				{
@@ -341,6 +357,9 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					frame.pop_front();
 					lastPulse = 1;
+					//next one has same polarity, need to fix
+					if (frame.front() == '+')
+						frame = BipolarAMI(frame, true);
 				}
 			}
 			else

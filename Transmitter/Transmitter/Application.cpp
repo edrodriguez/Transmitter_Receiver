@@ -99,3 +99,35 @@ void CopyListForTransmission(list<char> l, char(&arr)[537])
 		i++;
 	}
 }
+
+list<char> TurnFrameIntoList(Frame frame)
+{
+	list<char> l;
+
+	//syn char1
+	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--)
+	{
+		l.push_back(frame.synChar1[i]);
+	}
+
+	//syn char2
+	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar2.size(); i--)
+	{
+		l.push_back(frame.synChar2[i]);
+	}
+
+	//syn char
+	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.controlChar.size(); i--)
+	{
+		l.push_back(frame.controlChar[i]);
+	}
+
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	{
+		for (size_t i = it->size() - 1; i >= 0 && i < it->size() - 1; i--)
+			l.push_back((*it)[i]);
+	}
+
+	return l;
+
+}

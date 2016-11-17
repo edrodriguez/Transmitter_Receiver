@@ -44,3 +44,6 @@ void PrintList(list<Frame> l);
 //////////////////////////////////////////////////////////////////
 void CopyListForTransmission(list<char> l, char (&arr)[537]);
 
+list<char> TurnFrameIntoList(Frame frame);
+
+

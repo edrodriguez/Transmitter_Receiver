@@ -152,7 +152,7 @@ void ReceiveMessage()
 				list<bitset<8>> frame;
 				frame = ConvertToBitsets(binaryMessageString);
 
-				if (/*IsHammingValid(FrameWithHamming, framesReceived)*/true)
+				if (/*IsMessageValid(frame)*/true)
 				{
 
 					list<char> convertedFrame;
@@ -275,3 +275,60 @@ list<char> ConvertToBinary(vector<char> message)
 	return convertedMessage;
 }
 
+//////////////////////////////////////////////////////////////// 
+//  Description:Checks that the message had no transmission 
+//        errors. This will be expanded in future milestones 
+// 
+//  Arguments:  [in]list<bitset<8>>:list of bitsets representing 
+//                   the message 
+// 
+//  Return:    [out]bool:indicates if the message is valid 
+//              or not 
+//  Ret Value:  true if valid message, false if invalid 
+//////////////////////////////////////////////////////////////// 
+bool IsMessageValid(list<bitset<8>> binaryCharacters)
+{
+	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
+		if (!CheckParity(*it))
+			return false;
+	return true;
+}
+
+//////////////////////////////////////////////////////////////// 
+//  Description:Checks that the parity bit of the input bitset 
+//        is correct 
+// 
+//  Arguments:  [in]bitset<8>:binary bitset with a parity bit 
+// 
+//  Return:    [out]bool:indicates if the bitset has the  
+//              correct parity bit 
+//  Ret Value:  true if correct parity, false if incorrect 
+//////////////////////////////////////////////////////////////// 
+bool CheckParity(bitset<8> binaryChar)
+{
+	bitset<7> charWithoutParityBit;
+
+	//MSB is the parity bit 
+	int parityBit = binaryChar[binaryChar.size() - 1];
+
+	//remove remove parity bit 
+	for (size_t i = 0; i <= binaryChar.size() - 2; i++)
+		charWithoutParityBit[i] = binaryChar[i];
+
+	//supposed odd parity 
+	if (parityBit == 1)
+	{
+		//check remaining message for an odd number of 1s 
+		if (charWithoutParityBit.count() % 2 == 1)
+			return true;
+	}
+	//supposed even parity 
+	else if (parityBit == 0)
+	{
+		//check remaining message for an even number of 1s 
+		if (charWithoutParityBit.count() % 2 == 0)
+			return true;
+	}
+
+	return false;
+}

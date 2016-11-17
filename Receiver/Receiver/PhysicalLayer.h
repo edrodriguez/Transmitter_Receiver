@@ -63,3 +63,28 @@ list<bitset<8>> ConvertToBitsets(string frame);
 
 //////////////////////////////////
 list<char> ConvertToBinary(vector<char> message);
+
+//////////////////////////////////////////////////////////////// 
+//  Description:Checks that the message had no transmission 
+//        errors. This will be expanded in future milestones 
+// 
+//  Arguments:  [in]list<bitset<8>>:list of bitsets representing 
+//                   the message 
+// 
+//  Return:    [out]bool:indicates if the message is valid 
+//              or not 
+//  Ret Value:  true if valid message, false if invalid 
+////////////////////////////////////////////////////////////////
+bool IsMessageValid(list<bitset<8>> binaryCharacters);
+
+//////////////////////////////////////////////////////////////// 
+//  Description:Checks that the parity bit of the input bitset 
+//        is correct 
+// 
+//  Arguments:  [in]bitset<8>:binary bitset with a parity bit 
+// 
+//  Return:    [out]bool:indicates if the bitset has the  
+//              correct parity bit 
+//  Ret Value:  true if correct parity, false if incorrect 
+//////////////////////////////////////////////////////////////// 
+bool CheckParity(bitset<8> binaryChar);

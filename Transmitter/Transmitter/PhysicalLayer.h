@@ -94,6 +94,6 @@ void TransmitFrames(list<Frame> frames);
 
 list<char> PerformBipolarAMIOnFrame(Frame frame);
 
-list<char> BipolarAMI(bitset<8> b, bool &lastPulse);
+list<char> BipolarAMI(list<char> frame, bool lastPulse);
 
 list<char> HDB3(list<char> l);

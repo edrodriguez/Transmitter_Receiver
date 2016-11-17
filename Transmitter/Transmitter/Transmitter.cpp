@@ -3,8 +3,8 @@
 //				transmitter application. It calls fucntions in
 //				all layers of the transmitter, in order to get
 //				the information from an input file, convert it
-//				to the proper binary format, apply CRC or
-//				Hamming and transmit the message
+//				to the proper binary format, encode it using
+//				HDB3 and transmit the message
 ////////////////////////////////////////////////////////////////
 #include "Application.h"
 #include "DataLink.h"
@@ -42,22 +42,21 @@ int main(int argc, char* argv[])
 
 	//Read from File
 	infoFromFile = ReadFile();
-	cout << "-------------------Information From File-------------------" << endl;
+	cout << "-------------------Information From File--------------------" << endl;
 	PrintList(infoFromFile);
 
 	//Convert file text to binary
 	binaryData = ConvertTextForTransmission(infoFromFile);
-	cout << "----------Binary Representation of Each Character----------" << endl;
+	cout << "----------Binary Representation of Each Character-----------" << endl;
 	PrintList(binaryData);
 	cout << endl;
 
 	list<Frame> frames;
-	//frame and crc calculation
-	cout << "---------------------Frames---------------------" << endl;
+	cout << "---------------------------Frames---------------------------" << endl;
 	FrameMessage(binaryData, frames);
 	PrintList(frames);
 
-	cout << "----------Transmitter Message Using HDB3 Encoding----------" << endl;
+	cout << "----------Transmitting Message Using HDB3 Encoding----------" << endl;
 	TransmitFrames(frames);
 
 	return 0;
