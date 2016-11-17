@@ -107,25 +107,25 @@ list<char> TurnFrameIntoList(Frame frame)
 	//syn char1
 	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--)
 	{
-		l.push_back(frame.synChar1[i]);
+		l.push_back(frame.synChar1[i] + 48);
 	}
 
 	//syn char2
 	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar2.size(); i--)
 	{
-		l.push_back(frame.synChar2[i]);
+		l.push_back(char(frame.synChar2[i]) + 48);
 	}
 
 	//syn char
 	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.controlChar.size(); i--)
 	{
-		l.push_back(frame.controlChar[i]);
+		l.push_back(char(frame.controlChar[i]) + 48);
 	}
 
 	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
 	{
-		for (size_t i = it->size() - 1; i >= 0 && i < it->size() - 1; i--)
-			l.push_back((*it)[i]);
+		for (size_t i = it->size() - 1; i >= 0 && i < it->size(); i--)
+			l.push_back(char((*it)[i]) + 48);
 	}
 
 	return l;

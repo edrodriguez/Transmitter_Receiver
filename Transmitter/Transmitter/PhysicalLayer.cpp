@@ -147,7 +147,6 @@ void TransmitFrames(list<Frame> frames)
 		frame = TurnFrameIntoList(*it);
 		//Perform Bipolar AMI
 		frame = BipolarAMI(frame,false);
-		//frame = PerformBipolarAMIOnFrame(*it);
 		//Perform HDB3
 		frame = HDB3(frame);
 		cout << "- Encoded Frame:" << endl;
@@ -182,31 +181,6 @@ void TransmitFrames(list<Frame> frames)
 	}
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }
-
-//list<char> PerformBipolarAMIOnFrame(Frame frame)
-//{
-//	list<char> bipolarAMI;
-//	list<char> bipolarAMI;
-//	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
-//
-//	//transform SynChar 1
-//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar1, lastPulse));
-//
-//	//transform synChar 2
-//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.synChar2, lastPulse));
-//	
-//	//transform controlChar
-//	bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(frame.controlChar, lastPulse));
-//
-//	//transform data
-//	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
-//	{
-//		//transform data char
-//		bipolarAMI.splice(bipolarAMI.end(), BipolarAMI(*it, lastPulse));
-//	}
-//
-//	return bipolarAMI;
-//}
 
 list<char> BipolarAMI(list<char> frame, bool lastPulse)
 {
@@ -252,23 +226,31 @@ list<char> HDB3(list<char> frame)
 		{
 			countOfZeros = 0;
 			countOf1s++;
-			if (!lastPulse)
+			if (!lastPulse) {
 				HDB3Frame.push_back(frame.front());
+				lastPulse = 1;
+			}
 			else
+			{
 				HDB3Frame.push_back('-');
+				lastPulse = 0;
+			}
 			frame.pop_front();
-			lastPulse = 1;
 		}
 		else if (!frame.empty() && frame.front() == '-')
 		{
 			countOfZeros = 0;
 			countOf1s++;
-			if (lastPulse)
+			if (lastPulse) {
 				HDB3Frame.push_back(frame.front());
+				lastPulse = 0;
+			}
 			else
+			{
 				HDB3Frame.push_back('+');
+				lastPulse = 1;
+			}
 			frame.pop_front();
-			lastPulse = 0;
 		}
 		else if (!frame.empty() && frame.front() == '0')
 		{
@@ -301,7 +283,7 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					lastPulse = 1;
 					//next one has same polarity, need to fix
-					if (frame.front() == '+')
+					if (!frame.empty() && frame.front() == '+')
 						frame = BipolarAMI(frame,true);
 				}
 				else
@@ -318,8 +300,8 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					lastPulse = 0;
 					//next one has same polarity, need to fix
-					if (frame.front() == '-')
-						frame = BipolarAMI(frame, true);
+					if (!frame.empty() && frame.front() == '-')
+						frame = BipolarAMI(frame, false);
 				}
 			}
 			//Use B00V
@@ -340,8 +322,8 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					lastPulse = 0;
 					//next one has same polarity, need to fix
-					if (frame.front() == '-')
-						frame = BipolarAMI(frame, true);
+					if (!frame.empty() && frame.front() == '-')
+						frame = BipolarAMI(frame, false);
 				}
 				else
 				{
@@ -358,7 +340,7 @@ list<char> HDB3(list<char> frame)
 					frame.pop_front();
 					lastPulse = 1;
 					//next one has same polarity, need to fix
-					if (frame.front() == '+')
+					if (!frame.empty() && frame.front() == '+')
 						frame = BipolarAMI(frame, true);
 				}
 			}

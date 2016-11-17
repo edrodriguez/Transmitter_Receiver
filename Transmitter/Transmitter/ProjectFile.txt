@@ -1,3 +1,3 @@
--Hello, how are you?
--Hi, I am doing well. How about you?
--I am great, thanks for asking.
+-Hello. How are you doing today?
+-I am doing great. How about you?
+-I am awesome. Thanks for asking!

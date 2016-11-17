@@ -28,6 +28,9 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 list<char> ConvertBinaryMessage(list< bitset<8>> binaryCharacters);
 
+char ConvertBinaryToChar(bitset<8> binaryChar);
+
+
 ////////////////////////////////////////////////////////////////
 //	Description:Converts a string into a list of bools
 //
@@ -63,6 +66,8 @@ list<bitset<8>> ConvertToBitsets(string frame);
 
 //////////////////////////////////
 list<char> ConvertToBinary(vector<char> message);
+
+int Count1s(vector<char> l, int finalIndex);
 
 //////////////////////////////////////////////////////////////// 
 //  Description:Checks that the message had no transmission 

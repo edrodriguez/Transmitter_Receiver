@@ -38,9 +38,26 @@ list<char> ConvertBinaryMessage(list<bitset<8>> binaryCharacters)
 	list<char> convertedMessage;
 
 	for (list<bitset<8>>::iterator it = binaryCharacters.begin(); it != binaryCharacters.end(); it++)
-		convertedMessage.push_back(char(it->to_ulong()));
+		convertedMessage.push_back(ConvertBinaryToChar(*it));
 
 	return convertedMessage;
+}
+
+//////////////////////////////////////////////////////////////// 
+//  Description:Converts a bitset into a character 
+// 
+//  Arguments:  [in]bitset<8>:binary char 
+// 
+//  Return:    [out]char: character obtained from the binary 
+//////////////////////////////////////////////////////////////// 
+char ConvertBinaryToChar(bitset<8> binaryChar)
+{
+	bitset<7> charWithoutParityBit;
+
+	for (size_t i = 0; i <= binaryChar.size() - 2; i++)
+		charWithoutParityBit[i] = binaryChar[i];
+
+	return char(charWithoutParityBit.to_ulong());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -195,7 +212,7 @@ list<bitset<8>> ConvertToBitsets(string frame)
 	//get syn chars
 	for (int i = 0; i < 16; i += 8)
 	{
-		string synCharacter = frame.substr(i, 12);
+		string synCharacter = frame.substr(i, 8);
 		bitset<8> binaryCharacter(synCharacter);
 		binaryCharacters.push_back(binaryCharacter);
 	}
@@ -221,6 +238,8 @@ list<char> ConvertToBinary(vector<char> message)
 {
 	list<char> convertedMessage;
 	size_t lastIndexConverted = -1;
+	bool lastPulse = 0; //0 for negative pulse, 1 for positive pulse
+	int countOf1s = 0;
 	array<char,4> block;
 	array<array<char, 4>, 4> patterns{ {
 		{ '-', '0', '0', '-' },
@@ -241,6 +260,24 @@ list<char> ConvertToBinary(vector<char> message)
 		{
 			if (block == patterns[j])
 			{
+				//000V check other factors because it is possible that it is only 3 zeros
+				if (j == 2)
+				{
+					countOf1s = Count1s(message, i);
+					if (countOf1s % 2 != 0)
+						break;
+					if (!lastPulse)
+						break;
+				}
+				else if (j == 3)
+				{
+					countOf1s = Count1s(message, i);
+					if (countOf1s % 2 != 0)
+						break;
+					if (lastPulse)
+						break;
+				}
+
 				for (size_t k = lastIndexConverted + 1; k < i; k++)
 				{
 					if (message[k] == '+' || message[k] == '-')
@@ -258,6 +295,10 @@ list<char> ConvertToBinary(vector<char> message)
 				break;
 			}
 		}
+		if (block[0] == '+')
+			lastPulse = 1;
+		else if (block[0] == '-')
+			lastPulse = 0;
 	}
 
 	if (lastIndexConverted < message.size())
@@ -273,6 +314,17 @@ list<char> ConvertToBinary(vector<char> message)
 	}
 
 	return convertedMessage;
+}
+
+int Count1s(vector<char> l, int finalIndex) {
+	int countOf1s = 0;
+
+	for(int i = 0; i < finalIndex; i++) {
+		if (l[i] == '+' || l[i] == '-')
+			countOf1s++;
+	}
+
+	return countOf1s;
 }
 
 //////////////////////////////////////////////////////////////// 
