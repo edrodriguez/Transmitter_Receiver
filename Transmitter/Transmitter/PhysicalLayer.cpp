@@ -95,16 +95,12 @@ bool IsOddParity(bitset<7> binaryChar)
 }
 
 ////////////////////////////////////////////////////////////////
-//	Description:Starts the client connection and transmits all the
-//				messages composed of binary characters (with
-//				possible transmission errors given by numOfErrors)
+//	Description:Starts the client connection, encodes and 
+//				transmits all the messages composed of
+//				binary characters
 //
-//	**CRC Overload
-//	Arguments:	[in]list<CRC>: list containing all the
-//							   frames to be transmitted				/////////////////////////
-//				[in]int:number of errors to be introduced during
-//					    transmission
-//
+//	Arguments:	[in]list<Frame>: list containing all the
+//							   frames to be transmitted
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<Frame> frames)
 {
@@ -182,6 +178,21 @@ void TransmitFrames(list<Frame> frames)
 	send(Connection, finalMessage, sizeof(finalMessage), NULL);
 }
 
+//////////////////////////////////////////////////////////////// 
+//  Description:converts a list composed of 1s and 0s into a
+//				list composed of positive(+), negative(-) and
+//				zero(0) pulses following the Bipolar AMI protocol 
+// 
+//  Arguments:  [in]list<char>: list of 1s and 0s
+//				[in]bool: sign of last pulse. true for positive,
+//						false for negative. This will help
+//						determine the subsequent pulses according
+//						to the Bipolar AMI protocol
+// 
+//  Return:    [out]list<char>: list of characters composed of
+//						positive(+), negative(-) and zero(0)
+//						pulses following the BipolarAMI protocol 
+////////////////////////////////////////////////////////////////
 list<char> BipolarAMI(list<char> frame, bool lastPulse)
 {
 	list<char> bipolarAMI;
@@ -212,6 +223,16 @@ list<char> BipolarAMI(list<char> frame, bool lastPulse)
 	return bipolarAMI;
 }
 
+//////////////////////////////////////////////////////////////// 
+//  Description:implements the HDB3 protocol for encoding data
+// 
+//  Arguments:  [in]list<char>:list of characters composed of
+//						positive(+), negative(-) and zero(0)
+//						pulses following the BipolarAMI protocol 
+// 
+//  Return:    [out]list<char>: list of encoded data following
+//					the HDB3 protocol.
+////////////////////////////////////////////////////////////////
 list<char> HDB3(list<char> frame)
 {
 	list<char> HDB3Frame;

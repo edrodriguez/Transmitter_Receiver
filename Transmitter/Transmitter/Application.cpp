@@ -14,10 +14,6 @@
 
 using namespace std;
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
-
 ////////////////////////////////////////////////////////////////
 //	Description:It reads the file with the information to be
 //				transmitted and stores the characters in
@@ -44,6 +40,67 @@ list<char> ReadFile()
 		cout << "Could not read from ProjectFile.txt";
 
 	return characters;
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Transforms a frame struct with all the fields
+//				separated into a list will all the data together
+//
+//  Arguments:  [in]Frame: frame separated per block
+//
+//	Return:		[out]list<char>: list containing all the
+//						characters in the frame together
+////////////////////////////////////////////////////////////////
+list<char> TurnFrameIntoList(Frame frame)
+{
+	list<char> l;
+
+	//syn char1
+	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--)
+	{
+		l.push_back(frame.synChar1[i] + 48);
+	}
+
+	//syn char2
+	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar2.size(); i--)
+	{
+		l.push_back(char(frame.synChar2[i]) + 48);
+	}
+
+	//syn char
+	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.controlChar.size(); i--)
+	{
+		l.push_back(char(frame.controlChar[i]) + 48);
+	}
+
+	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
+	{
+		for (size_t i = it->size() - 1; i >= 0 && i < it->size(); i--)
+			l.push_back(char((*it)[i]) + 48);
+	}
+
+	return l;
+
+}
+
+////////////////////////////////////////////////////////////////
+//	Description:Copies the contents of a list of characters into
+//				an array of characters for transmission of data
+//
+//  Arguments:  [in]list<char>: list of characters to be copied
+//
+//	Return:		[out]char(&array)[537]: array for the characters
+//						to be copied
+////////////////////////////////////////////////////////////////
+void CopyListForTransmission(list<char> l, char(&arr)[537])
+{
+	int i = 0;
+	while (!l.empty() && i < sizeof(arr) / sizeof(*arr))
+	{
+		arr[i] = l.front();
+		l.pop_front();
+		i++;
+	}
 }
 
 /////////////////////
@@ -86,48 +143,4 @@ void PrintList(list<Frame> l)
 	}
 	
 	cout << endl;
-}
-
-/////////////////////////////////////////////////
-void CopyListForTransmission(list<char> l, char(&arr)[537])
-{
-	int i = 0;
-	while (!l.empty() && i < sizeof(arr) / sizeof(*arr))
-	{
-		arr[i] = l.front();
-		l.pop_front();
-		i++;
-	}
-}
-
-list<char> TurnFrameIntoList(Frame frame)
-{
-	list<char> l;
-
-	//syn char1
-	for (size_t i = frame.synChar1.size() - 1; i >= 0 && i < frame.synChar1.size(); i--)
-	{
-		l.push_back(frame.synChar1[i] + 48);
-	}
-
-	//syn char2
-	for (size_t i = frame.synChar2.size() - 1; i >= 0 && i < frame.synChar2.size(); i--)
-	{
-		l.push_back(char(frame.synChar2[i]) + 48);
-	}
-
-	//syn char
-	for (size_t i = frame.controlChar.size() - 1; i >= 0 && i < frame.controlChar.size(); i--)
-	{
-		l.push_back(char(frame.controlChar[i]) + 48);
-	}
-
-	for (list<bitset<8>>::iterator it = frame.data.begin(); it != frame.data.end(); it++)
-	{
-		for (size_t i = it->size() - 1; i >= 0 && i < it->size(); i--)
-			l.push_back(char((*it)[i]) + 48);
-	}
-
-	return l;
-
 }

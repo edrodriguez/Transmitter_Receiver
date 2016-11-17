@@ -6,19 +6,13 @@
 //				message to binary, applying CRC or Hamming
 //				and transmitting the message
 ////////////////////////////////////////////////////////////////
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma comment(lib,"ws2_32.lib")
-#include <WinSock2.h>
 #include <string>
 #include <list>
 #include <bitset>
 
 using namespace std;
 
-/**************************************************************/
-/***********************Structs for Data***********************/
-/**************************************************************/
-
+//Struct for organization of the frame
 struct Frame
 {
 	bitset<8> synChar1;
@@ -27,21 +21,17 @@ struct Frame
 	list<bitset<8>> data;
 };
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
-
 //////////////////////////////////////////////////////////////// 
-//  Description: converts a list of characters into a list of 
-//         bitsets containing a 7 bit binary representation 
-//         of a character and a parity bit 
+//  Description:converts a list of characters into a list of 
+//				bitsets containing a 7 bit binary representation 
+//				of a character and a parity bit 
 // 
 //  Arguments:  [in]list<char>: list of characters 
 // 
-//  Return:    [out]list<bitset<8>>:list of bitsets. Each bitset 
-//                   made up of 7 binary bits 
-//                   representing a character 
-//                   and a parity bit 
+//  Return:		[out]list<bitset<8>>:list of bitsets. Each bitset 
+//						made up of 7 binary bits 
+//						representing a character 
+//						and a parity bit 
 //////////////////////////////////////////////////////////////// 
 list<bitset<8>> ConvertTextForTransmission(list<char> charList);
 
@@ -79,21 +69,40 @@ bitset<8> IncludeParityBit(bitset<7> binaryChar);
 bool IsOddParity(bitset<7> binaryChar);
 
 ////////////////////////////////////////////////////////////////
-//	Description:Starts the client connection and transmits all the
-//				messages composed of binary characters (with
-//				possible transmission errors given by numOfErrors)
+//	Description:Starts the client connection, encodes and 
+//				transmits all the messages composed of
+//				binary characters
 //
-//	**CRC Overload
-//	Arguments:	[in]list<CRC>: list containing all the
+//	Arguments:	[in]list<Frame>: list containing all the
 //							   frames to be transmitted
-//				[in]int:number of errors to be introduced during
-//					    transmission
-//
 ////////////////////////////////////////////////////////////////
 void TransmitFrames(list<Frame> frames);
 
-list<char> PerformBipolarAMIOnFrame(Frame frame);
-
+//////////////////////////////////////////////////////////////// 
+//  Description:converts a list composed of 1s and 0s into a
+//				list composed of positive(+), negative(-) and
+//				zero(0) pulses following the Bipolar AMI protocol 
+// 
+//  Arguments:  [in]list<char>: list of 1s and 0s
+//				[in]bool: sign of last pulse. true for positive,
+//						false for negative. This will help
+//						determine the subsequent pulses according
+//						to the Bipolar AMI protocol
+// 
+//  Return:    [out]list<char>: list of characters composed of
+//						positive(+), negative(-) and zero(0)
+//						pulses following the BipolarAMI protocol 
+////////////////////////////////////////////////////////////////
 list<char> BipolarAMI(list<char> frame, bool lastPulse);
 
+//////////////////////////////////////////////////////////////// 
+//  Description:implements the HDB3 protocol for encoding data
+// 
+//  Arguments:  [in]list<char>:list of characters composed of
+//						positive(+), negative(-) and zero(0)
+//						pulses following the BipolarAMI protocol 
+// 
+//  Return:    [out]list<char>: list of encoded data following
+//					the HDB3 protocol.
+////////////////////////////////////////////////////////////////
 list<char> HDB3(list<char> l);
