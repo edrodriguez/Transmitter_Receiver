@@ -3,7 +3,7 @@
 //	Description:This file contains the declaration of functions
 //				of the physical layer of the transmitter.
 //				This layer is in charge of converting the
-//				message to binary, applying CRC or Hamming
+//				message to binary, encoding it
 //				and transmitting the message
 ////////////////////////////////////////////////////////////////
 #include <string>

@@ -81,10 +81,9 @@ list<bool> ConvertToBoolList(string message)
 
 ////////////////////////////////////////////////////////////////
 //	Description:Starts the server connection, receives the
-//				messages transmitted, calls methods for checking
-//				the validity of the messages, attempts to 
-//				correct it if there is an error and prints out		///////////////////////////
-//				the messages to the console
+//				messages transmitted, decodes it, calls methods
+//				for checking the validity of the messages, and
+//				prints out the message to the console
 ////////////////////////////////////////////////////////////////
 void ReceiveMessage()
 {
@@ -159,7 +158,7 @@ void ReceiveMessage()
 				}
 
 				//Convert received message to binary
-				list<char> binaryMessage = ConvertToBinary(message);
+				list<char> binaryMessage = DecodeHDB3(message);
 
 				string binaryMessageString;
 				for (list<char>::iterator it = binaryMessage.begin(); it != binaryMessage.end(); it++)
@@ -169,7 +168,7 @@ void ReceiveMessage()
 				list<bitset<8>> frame;
 				frame = ConvertToBitsets(binaryMessageString);
 
-				if (/*IsMessageValid(frame)*/true)
+				if (IsMessageValid(frame))
 				{
 
 					list<char> convertedFrame;
@@ -198,11 +197,11 @@ void ReceiveMessage()
 
 ////////////////////////////////////////////////////////////////
 //	Description:Separates a string of binary characters into
-//				12 bit bitsets
+//				8 bit bitsets
 //
-//	Arguments:	[in]string: message
+//	Arguments:	[in]string: frame
 //
-//	Return:		[out]list<bitset<12>>:list of bitsets representing			//////////////
+//	Return:		[out]list<bitset<8>>:list of bitsets representing
 //									 the received frame
 ////////////////////////////////////////////////////////////////
 list<bitset<8>> ConvertToBitsets(string frame)
@@ -234,7 +233,15 @@ list<bitset<8>> ConvertToBitsets(string frame)
 	return binaryCharacters;
 }
 
-list<char> ConvertToBinary(vector<char> message)
+////////////////////////////////////////////////////////////////
+//	Description:Decodes a vector of characters with HDB3 encoding
+//				and saves the result into a list of 1s and 0s
+//
+//	Arguments:	[in]vector<char>: message
+//
+//	Return:		[out]list<char>:list decoded 1s and 0s
+////////////////////////////////////////////////////////////////
+list<char> DecodeHDB3(vector<char> message)
 {
 	list<char> convertedMessage;
 	size_t lastIndexConverted = -1;
@@ -316,6 +323,16 @@ list<char> ConvertToBinary(vector<char> message)
 	return convertedMessage;
 }
 
+////////////////////////////////////////////////////////////////
+//	Description:counts the number of +s and -s in a list of chars
+//				from the beginning of the list until finalIndex-1
+//
+//	Arguments:	[in]vector<char>: list to check
+//				[in]int: Index to determine the termination of the
+//						loop
+//
+//	Return:		[out]int: number of +s and -s
+////////////////////////////////////////////////////////////////
 int Count1s(vector<char> l, int finalIndex) {
 	int countOf1s = 0;
 
@@ -329,7 +346,7 @@ int Count1s(vector<char> l, int finalIndex) {
 
 //////////////////////////////////////////////////////////////// 
 //  Description:Checks that the message had no transmission 
-//        errors. This will be expanded in future milestones 
+//        errors 
 // 
 //  Arguments:  [in]list<bitset<8>>:list of bitsets representing 
 //                   the message 

@@ -12,9 +12,13 @@
 
 using namespace std;
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
+////////////////////////////////////////////////////////////////
+//	Description:Starts the server connection, receives the
+//				messages transmitted, decodes it, calls methods
+//				for checking the validity of the messages, and
+//				prints out the message to the console
+////////////////////////////////////////////////////////////////
+void ReceiveMessage();
 
 ////////////////////////////////////////////////////////////////
 //	Description:Converts a list of bitsets into a list of
@@ -28,50 +32,51 @@ using namespace std;
 ////////////////////////////////////////////////////////////////
 list<char> ConvertBinaryMessage(list< bitset<8>> binaryCharacters);
 
+//////////////////////////////////////////////////////////////// 
+//  Description:Converts a bitset into a character 
+// 
+//  Arguments:  [in]bitset<8>:binary char 
+// 
+//  Return:    [out]char: character obtained from the binary 
+//////////////////////////////////////////////////////////////// 
 char ConvertBinaryToChar(bitset<8> binaryChar);
-
-
-////////////////////////////////////////////////////////////////
-//	Description:Converts a string into a list of bools
-//
-//	Arguments:	[in]string: frame
-//
-//	Return:		[out]list<bool>:list of bools representing
-//									 the frame					
-////////////////////////////////////////////////////////////////
-list<bool> ConvertToBoolList(string message);
-
-/**************************************************************/
-/***************************Hamming****************************/
-/**************************************************************/
-
-////////////////////////////////////////////////////////////////
-//	Description:Starts the server connection, receives the
-//				messages transmitted, and prints out
-//				the messages to the console
-////////////////////////////////////////////////////////////////
-void ReceiveMessage();
 
 ////////////////////////////////////////////////////////////////
 //	Description:Separates a string of binary characters into
-//				12 bit bitsets
+//				8 bit bitsets
 //
-//	Arguments:	[in]string: message
+//	Arguments:	[in]string: frame
 //
-//	Return:		[out]list<bitset<12>>:list of bitsets representing
+//	Return:		[out]list<bitset<8>>:list of bitsets representing
 //									 the received frame
 ////////////////////////////////////////////////////////////////
 list<bitset<8>> ConvertToBitsets(string frame);
 
+////////////////////////////////////////////////////////////////
+//	Description:Decodes a vector of characters with HDB3 encoding
+//				and saves the result into a list of 1s and 0s
+//
+//	Arguments:	[in]vector<char>: message
+//
+//	Return:		[out]list<char>:list decoded 1s and 0s
+////////////////////////////////////////////////////////////////
+list<char> DecodeHDB3(vector<char> message);
 
-//////////////////////////////////
-list<char> ConvertToBinary(vector<char> message);
-
+////////////////////////////////////////////////////////////////
+//	Description:counts the number of +s and -s in a list of chars
+//				from the beginning of the list until finalIndex-1
+//
+//	Arguments:	[in]vector<char>: list to check
+//				[in]int: Index to determine the termination of the
+//						loop
+//
+//	Return:		[out]int: number of +s and -s
+////////////////////////////////////////////////////////////////
 int Count1s(vector<char> l, int finalIndex);
 
 //////////////////////////////////////////////////////////////// 
 //  Description:Checks that the message had no transmission 
-//        errors. This will be expanded in future milestones 
+//        errors 
 // 
 //  Arguments:  [in]list<bitset<8>>:list of bitsets representing 
 //                   the message 

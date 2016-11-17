@@ -53,8 +53,4 @@ void PrintList(list<bitset<8>> l);
 /////////////////////
 ////Auxiliary method for printing list
 ////////////////////
-void PrintList(list<bitset<12>> l);
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
 void PrintList(list<Frame> l);

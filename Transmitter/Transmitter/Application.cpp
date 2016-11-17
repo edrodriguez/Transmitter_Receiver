@@ -120,15 +120,6 @@ void PrintList(list<bitset<8>> l)
 	for (list<bitset<8>>::iterator it = l.begin(); it != l.end(); it++)
 		cout << *it << ' ';
 }
-/////////////////////
-////Auxiliary method for printing list
-////////////////////
-void PrintList(list<bitset<12>> l)
-{
-	for (list<bitset<12>>::iterator it = l.begin(); it != l.end(); it++)
-		cout << *it << ' ';
-	cout << endl;
-}
 
 /////////////////////
 ////Auxiliary method for printing list

@@ -13,24 +13,35 @@
 
 using namespace std;
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
-
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing the ASCII Syn char
-//				22(decimal) in binary							
+//	Description:Generates a list of frames with each entry
+//				containing a Frame struct representing a message.
+//				Each one contains two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message), up to 64 information characters. Each
+//				character composed of 7 information bits and 1
+//				parity bit
 //
-//	Return:		[out]bitset<8>: 8 bit binary code for 22
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in binary bitsets
+//				[in/out]list<Frame>:list of Frames containing
+//								 all the framed messages
 ////////////////////////////////////////////////////////////////
-bitset<8> IncludeSynChar()
+void FrameMessage(list<bitset<8>> data, list<Frame> &frames)
 {
-	const string ACII_22 = "0010110";
-	bitset<7> synChar(ACII_22);
+	list<list<bitset<8>>> blocks;
 
-	bitset<8> synCharWithParity = IncludeParityBit(synChar);
+	blocks = SeparateInBlocks(&data);
 
-	return synCharWithParity;
+	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
+	{
+		Frame frame;
+		frame.synChar1 = IncludeSynChar();
+		frame.synChar2 = IncludeSynChar();
+		frame.controlChar = IncludeControlChar(*it);
+		frame.data = *it;
+		frames.push_back(frame);
+	}
 }
 
 ////////////////////////////////////////////////////////////////
@@ -72,6 +83,22 @@ list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters)
 }
 
 ////////////////////////////////////////////////////////////////
+//	Description:Returns a string containing the ASCII Syn char
+//				22(decimal) in binary							
+//
+//	Return:		[out]bitset<8>: 8 bit binary code for 22
+////////////////////////////////////////////////////////////////
+bitset<8> IncludeSynChar()
+{
+	const string ACII_22 = "0010110";
+	bitset<7> synChar(ACII_22);
+
+	bitset<8> synCharWithParity = IncludeParityBit(synChar);
+
+	return synCharWithParity;
+}
+
+////////////////////////////////////////////////////////////////
 //	Description:Returns a bitset containing information on the
 //				length of the message (the number of characters
 //				contained on each block)
@@ -107,36 +134,4 @@ int CountCharsInBlock(list<bitset<8>> block)
 	int numChars = block.size();
 
 	return numChars;
-}
-
-////////////////////////////////////////////////////////////////
-//	Description:Generates a list a frame with each entry
-//				containing a CRCFrame representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message), up to 64 information characters. Each
-//				character composed of 8 information bits and 4
-//				hamming parity bits
-//
-//	**Hamming Overload
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed				////////////////
-//									in binary bitsets
-//				[out]list<HammingFrrame>:list of CRCFrames containing
-//								         all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<Frame> &frames)
-{
-	list<list<bitset<8>>> blocks;
-
-	blocks = SeparateInBlocks(&data);
-
-	for (list<list<bitset<8>>>::iterator it = blocks.begin(); it != blocks.end(); it++)
-	{
-		Frame frame;
-		frame.synChar1 = IncludeSynChar();
-		frame.synChar2 = IncludeSynChar();
-		frame.controlChar = IncludeControlChar(*it);
-		frame.data = *it;
-		frames.push_back(frame);
-	}
 }

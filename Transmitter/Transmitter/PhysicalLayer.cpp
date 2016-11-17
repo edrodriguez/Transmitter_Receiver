@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////
-//	Description:This file contains the definition of functions
+//	Description:This file contains the declaration of functions
 //				of the physical layer of the transmitter.
 //				This layer is in charge of converting the
-//				message to binary, applying CRC or Hamming
+//				message to binary, encoding it
 //				and transmitting the message
 ////////////////////////////////////////////////////////////////
 #define _WINSOCK_DEPRECATED_NO_WARNINGS

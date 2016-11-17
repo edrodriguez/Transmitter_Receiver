@@ -13,17 +13,21 @@
 
 using namespace std;
 
-/**************************************************************/
-/****************************Common****************************/
-/**************************************************************/
-
 ////////////////////////////////////////////////////////////////
-//	Description:Returns a string containing the ASCII Syn char
-//				22(decimal) in binary							
+//	Description:Generates a list of frames with each entry
+//				containing a Frame struct representing a message.
+//				Each one contains two syn characters (22 in decimal),
+//				a control character (number of characters in the
+//				message), up to 64 information characters. Each
+//				character composed of 7 information bits and 1
+//				parity bit
 //
-//	Return:		[out]bitset<8>: 8 bit binary code for 22
+//	Arguments:	[in]list<bitset<8>>:list of characters expressed
+//									in binary bitsets
+//				[in/out]list<Frame>:list of Frames containing
+//								 all the framed messages
 ////////////////////////////////////////////////////////////////
-bitset<8> IncludeSynChar();
+void FrameMessage(list<bitset<8>> data, list<Frame> &frame);
 
 ////////////////////////////////////////////////////////////////
 //	Description:separates the bitsets in groups of 64
@@ -36,6 +40,14 @@ bitset<8> IncludeSynChar();
 //						separated in groups of 64
 ////////////////////////////////////////////////////////////////
 list<list<bitset<8>>> SeparateInBlocks(list<bitset<8>> *binaryChacarcters);
+
+////////////////////////////////////////////////////////////////
+//	Description:Returns a string containing the ASCII Syn char
+//				22(decimal) in binary							
+//
+//	Return:		[out]bitset<8>: 8 bit binary code for 22
+////////////////////////////////////////////////////////////////
+bitset<8> IncludeSynChar();
 
 ////////////////////////////////////////////////////////////////
 //	Description:Returns a bitset containing information on the
@@ -60,20 +72,3 @@ bitset<8> IncludeControlChar(list<bitset<8>> block);
 //						 in the block
 ////////////////////////////////////////////////////////////////
 int CountCharsInBlock(list<bitset<8>> block);
-
-////////////////////////////////////////////////////////////////
-//	Description:Generates a list a frame with each entry
-//				containing a CRCFrame representing a message. Each
-//				one containing two syn characters (22 in decimal),
-//				a control character (number of characters in the
-//				message), up to 64 information characters. Each
-//				character composed of 8 information bits and 4
-//				hamming parity bits
-//
-//	**Hamming Overload
-//	Arguments:	[in]list<bitset<8>>:list of characters expressed
-//									in binary bitsets
-//				[out]list<HammingFrrame>:list of CRCFrames containing			/////////////
-//								         all the framed messages
-////////////////////////////////////////////////////////////////
-void FrameMessage(list<bitset<8>> data, list<Frame> &frame);
